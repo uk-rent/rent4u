@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,7 +27,6 @@ const RegisterPage = () => {
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
   
-  // If already logged in, redirect to home
   useEffect(() => {
     if (user) {
       navigate("/");
@@ -183,3 +181,6 @@ const RegisterPage = () => {
       </Card>
     </div>
   );
+};
+
+export default RegisterPage;

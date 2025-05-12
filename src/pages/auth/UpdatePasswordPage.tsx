@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -67,7 +66,6 @@ const UpdatePasswordPage = () => {
         description: "Your password has been successfully updated",
       });
 
-      // Redirect to login page
       navigate('/auth/login');
     } catch (error: any) {
       toast({
@@ -127,3 +125,6 @@ const UpdatePasswordPage = () => {
       </Card>
     </div>
   );
+};
+
+export default UpdatePasswordPage;

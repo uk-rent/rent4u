@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -95,3 +94,6 @@ const ResetPasswordPage = () => {
       </Card>
     </div>
   );
+};
+
+export default ResetPasswordPage;
