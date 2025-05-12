@@ -1,0 +1,111 @@
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+
+const HeroSection = () => {
+  const [priceRange, setPriceRange] = useState([300, 5000]);
+  
+  return (
+    <div className="relative hero-section min-h-[600px] md:min-h-[700px] flex items-center justify-center py-20">
+      <div className="absolute inset-0 bg-gradient-to-b from-secondary/70 to-secondary/40"></div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-center md:space-x-10">
+          <div className="w-full md:w-1/2 text-white">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+              Find Your Perfect
+              <span className="block text-primary">London</span> Home
+            </h1>
+            <p className="text-lg md:text-xl opacity-90 mb-8">
+              The premium platform for renting apartments, rooms, and shared houses in London,
+              tailored for young professionals and families.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" className="bg-primary hover:bg-primary-hover text-white">
+                Start Your Search
+              </Button>
+              <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
+                How It Works
+              </Button>
+            </div>
+          </div>
+          
+          <div className="w-full md:w-1/2 mt-12 md:mt-0">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center mb-6">
+                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h2 className="ml-2 text-xl font-bold text-secondary">Search Properties</h2>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <div className="relative">
+                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <Input placeholder="Enter address, neighborhood, or zipcode" className="pl-10" />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                  <Select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All property types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All property types</SelectItem>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="room">Room</SelectItem>
+                      <SelectItem value="shared-house">Shared House</SelectItem>
+                      <SelectItem value="studio">Studio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700">Price (up to)</label>
+                    <span className="text-sm text-primary font-medium">£{priceRange[1]}/month</span>
+                  </div>
+                  <div className="px-2">
+                    <Slider
+                      defaultValue={[5000]}
+                      max={10000}
+                      min={300}
+                      step={100}
+                      onValueChange={(value) => setPriceRange([300, value[0]])}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs text-gray-500">£{priceRange[0]}</span>
+                    <span className="text-xs text-gray-500">£10,000+</span>
+                  </div>
+                </div>
+                
+                <Button className="w-full bg-primary hover:bg-primary-hover text-white">
+                  Search Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="wave-divider">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+export default HeroSection;
