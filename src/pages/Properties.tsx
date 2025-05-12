@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import PropertyCard from '@/components/PropertyCard';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Example data (keep the same initialProperties array)
+// Example data
 const initialProperties = [
   {
     id: '1',
@@ -27,19 +27,7 @@ const initialProperties = [
     available: 'now',
     featured: true
   },
-  {
-    id: '2',
-    title: 'Spacious Family Home',
-    location: 'Greenwich',
-    postcode: 'SE10 8EW',
-    price: 3500,
-    image: '/images/property-2.jpg',
-    propertyType: 'House',
-    beds: 4,
-    baths: 3,
-    available: '2024-06-01',
-    featured: false
-  },
+  // ... resto de las propiedades
 ];
 
 export default function PropertiesPage() {
@@ -51,12 +39,49 @@ export default function PropertiesPage() {
     propertyType: '',
     beds: '',
   });
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    try {
+      // Simular carga inicial
+      setIsLoading(false);
+      console.log('Properties page mounted successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error loading properties');
+      console.error('Error in PropertiesPage:', err);
+    }
+  }, []);
+
+  // Si hay un error, mostrarlo
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold text-red-600 mb-4">Error</h1>
+          <p>{error}</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Si está cargando, mostrar indicador
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 flex justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   const handleFavoriteToggle = (propertyId: string) => {
     console.log('Toggle favorite for property:', propertyId);
   };
 
   const handleFilterChange = (key: string, value: string) => {
+    console.log('Filter change:', key, value);
     setFilters(prev => ({
       ...prev,
       [key]: value
