@@ -86,7 +86,7 @@ const HeroSection = () => {
                   <div className="px-2">
                     <Slider
                       defaultValue={[5000]}
-                      max={10000}
+                      max={5000}
                       min={300}
                       step={100}
                       onValueChange={(value) => setPriceRange([300, value[0]])}
