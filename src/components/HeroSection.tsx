@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,18 +8,23 @@ const HeroSection = () => {
   const [priceRange, setPriceRange] = useState([300, 5000]);
   
   return (
-    <div className="relative hero-section min-h-[600px] md:min-h-[700px] flex items-center justify-center py-20">
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/70 to-secondary/40"></div>
-
-      <div className="container mx-auto px-4 relative z-10">
+    <div 
+      className="relative hero-section min-h-[600px] md:min-h-[700px] flex items-center justify-center py-20"
+      style={{
+        backgroundImage: `url('/images/hero-background.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="container mx-auto px-4 relative z-10 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:space-x-10">
-          <div className="w-full md:w-1/2 text-white">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+          <div className="w-full md:w-1/2">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-[Playfair Display]">
               Find Your Ideal
               <span className="block">Shared Room in</span>
               <span className="text-primary">London</span>
             </h1>
-            <p className="text-lg md:text-xl opacity-90 mb-8">
+            <p className="text-lg md:text-xl opacity-90 mb-8 font-[Playfair Display]">
               Comfortable and affordable rooms in London's best locations, perfect for
               students and young professionals.
             </p>
@@ -98,12 +102,6 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="wave-divider">
-        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
-        </svg>
       </div>
     </div>
   );
