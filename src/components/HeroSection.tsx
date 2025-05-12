@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,9 +33,11 @@ const HeroSection = () => {
               <Button size="lg" className="bg-primary hover:bg-primary-hover text-white">
                 Start Your Search
               </Button>
-              <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-                How It Works
-              </Button>
+              <Link href="/how-it-works">
+                <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
+                  How It Works
+                </Button>
+              </Link>
             </div>
           </div>
           
