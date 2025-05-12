@@ -4,19 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-
 const HeroSection = () => {
   const [priceRange, setPriceRange] = useState([300, 5000]);
-  
-  return (
-    <div 
-      className="relative hero-section min-h-[600px] md:min-h-[700px] flex items-center justify-center py-20"
-      style={{
-        backgroundImage: `url('/images/hero-background.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
+  return <div className="relative hero-section min-h-[600px] md:min-h-[700px] flex items-center justify-center py-20" style={{
+    backgroundImage: `url('/images/hero-background.jpg')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
+  }}>
       <div className="container mx-auto px-4 relative z-10 text-white">
         <div className="flex flex-col md:flex-row md:items-center md:space-x-10">
           <div className="w-full md:w-1/2">
@@ -60,7 +54,7 @@ const HeroSection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <Input placeholder="Enter address, neighbourhood, or zipcode" className="pl-10" />
+                    <Input placeholder="Enter address, neighbourhood, or zipcode" className="pl-10 bg-transparent" />
                   </div>
                 </div>
                 
@@ -86,13 +80,7 @@ const HeroSection = () => {
                     <span className="text-sm text-primary font-medium">£{priceRange[1]}/month</span>
                   </div>
                   <div className="px-2">
-                    <Slider
-                      defaultValue={[5000]}
-                      max={5000}
-                      min={300}
-                      step={100}
-                      onValueChange={(value) => setPriceRange([300, value[0]])}
-                    />
+                    <Slider defaultValue={[5000]} max={5000} min={300} step={100} onValueChange={value => setPriceRange([300, value[0]])} />
                   </div>
                   <div className="flex justify-between mt-1">
                     <span className="text-xs text-gray-500">£{priceRange[0]}</span>
@@ -108,8 +96,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroSection;
