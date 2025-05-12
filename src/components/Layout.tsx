@@ -19,25 +19,25 @@ const Layout = ({ children }: LayoutProps) => {
                 to="/properties" 
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Propiedades
+                Properties
               </Link>
               <Link 
                 to="/how-it-works" 
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
-                Cómo Funciona
+                How it Works
               </Link>
               <Link 
                 to="/auth/login" 
                 className="text-sm font-medium text-primary hover:text-primary/90 transition-colors"
               >
-                Iniciar Sesión
+                Login
               </Link>
               <Link 
                 to="/auth/register" 
                 className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
               >
-                Registrarse
+                Register
               </Link>
             </div>
           </nav>
@@ -49,7 +49,7 @@ const Layout = ({ children }: LayoutProps) => {
       <footer className="border-t bg-white">
         <div className="container mx-auto px-4 py-6">
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Rent4U. Todos los derechos reservados.
+            © {new Date().getFullYear()} Rent4U. All rights reserved.
           </p>
         </div>
       </footer>
