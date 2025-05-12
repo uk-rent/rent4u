@@ -80,7 +80,7 @@ const HeroSection = () => {
                     <span className="text-sm text-primary font-medium">£{priceRange[1]}/month</span>
                   </div>
                   <div className="px-2">
-                    <Slider defaultValue={[5000]} max={5000} min={300} step={100} onValueChange={value => setPriceRange([300, value[0]])} />
+                    <Slider defaultValue={[300]} max={5000} min={300} step={100} onValueChange={value => setPriceRange([300, value[0]])} />
                   </div>
                   <div className="flex justify-between mt-1">
                     <span className="text-xs text-gray-500">£{priceRange[0]}</span>
