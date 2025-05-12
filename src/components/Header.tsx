@@ -44,7 +44,7 @@ const Header = () => {
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
             <h1 className="text-2xl font-bold">
-              <span className="text-secondary">rent</span>
+              <span className="text-secondary">Rent</span>
               <span className="text-primary">in</span>
               <span className="text-secondary">london</span>
             </h1>
