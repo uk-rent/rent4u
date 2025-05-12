@@ -123,6 +123,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           address: string
@@ -135,6 +168,7 @@ export type Database = {
           featured_order: number | null
           id: string
           images: Json | null
+          is_draft: boolean | null
           is_external_active: boolean | null
           is_featured: boolean | null
           last_modified_at: string | null
@@ -142,6 +176,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           occupied_rooms: number | null
+          owner_id: string | null
           status: string | null
           total_rooms: number
           updated_at: string | null
@@ -157,6 +192,7 @@ export type Database = {
           featured_order?: number | null
           id?: string
           images?: Json | null
+          is_draft?: boolean | null
           is_external_active?: boolean | null
           is_featured?: boolean | null
           last_modified_at?: string | null
@@ -164,6 +200,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           occupied_rooms?: number | null
+          owner_id?: string | null
           status?: string | null
           total_rooms: number
           updated_at?: string | null
@@ -179,6 +216,7 @@ export type Database = {
           featured_order?: number | null
           id?: string
           images?: Json | null
+          is_draft?: boolean | null
           is_external_active?: boolean | null
           is_featured?: boolean | null
           last_modified_at?: string | null
@@ -186,6 +224,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           occupied_rooms?: number | null
+          owner_id?: string | null
           status?: string | null
           total_rooms?: number
           updated_at?: string | null
@@ -312,6 +351,35 @@ export type Database = {
           },
         ]
       }
+      saved_properties: {
+        Row: {
+          created_at: string | null
+          id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           key: string
@@ -374,7 +442,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "tenant" | "landlord" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -489,6 +557,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["tenant", "landlord", "admin"],
+    },
   },
 } as const

@@ -1,10 +1,42 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/contexts/AuthContext';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const handlePublishPropertyClick = () => {
+    if (!user) {
+      navigate('/auth/login', { state: { from: '/publish-property' } });
+    } else {
+      navigate('/publish-property');
+    }
+  };
+
+  // Get user's initials for avatar
+  const getUserInitials = () => {
+    if (!user) return '';
+    const email = user.email || '';
+    return email.substring(0, 2).toUpperCase();
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm">
@@ -22,19 +54,76 @@ const Header = () => {
             <Link to="/" className="text-secondary hover:text-primary transition-colors font-medium">Home</Link>
             <Link to="/properties" className="text-secondary hover:text-primary transition-colors font-medium">Properties</Link>
             <Link to="/how-it-works" className="text-secondary hover:text-primary transition-colors font-medium">How it Works</Link>
+            {userRole === 'admin' && (
+              <Link to="/admin" className="text-secondary hover:text-primary transition-colors font-medium">Admin</Link>
+            )}
           </nav>
         </div>
         
         <div className="hidden md:flex space-x-4 items-center">
-          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-            <span className="mr-1">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3" />
-              </svg>
-            </span>
-            Log In
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-primary text-white">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {userRole === 'landlord' && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/my-properties')}>
+                      My Properties
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/publish-property')}>
+                      Publish Property
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {userRole === 'tenant' && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/saved-properties')}>
+                      Saved Properties
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                className="border-primary text-primary hover:bg-primary hover:text-white"
+                onClick={() => navigate('/auth/login')}
+              >
+                <span className="mr-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3" />
+                  </svg>
+                </span>
+                Log In
+              </Button>
+            </>
+          )}
+          <Button 
+            className="bg-primary hover:bg-primary-hover text-white"
+            onClick={handlePublishPropertyClick}
+          >
+            Publish Property
           </Button>
-          <Button className="bg-primary hover:bg-primary-hover text-white">Publish Property</Button>
         </div>
         
         {/* Mobile menu button */}
@@ -64,10 +153,46 @@ const Header = () => {
             <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Home</Link>
             <Link to="/properties" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Properties</Link>
             <Link to="/how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">How it Works</Link>
-            <div className="flex flex-col space-y-2 mt-4 px-3 py-2">
-              <Button variant="outline" className="w-full justify-center border-primary text-primary hover:bg-primary hover:text-white">Log In</Button>
-              <Button className="w-full justify-center bg-primary hover:bg-primary-hover text-white">Publish Property</Button>
-            </div>
+            {userRole === 'admin' && (
+              <Link to="/admin" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Admin</Link>
+            )}
+            
+            {user ? (
+              <>
+                {userRole === 'landlord' && (
+                  <>
+                    <Link to="/my-properties" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">My Properties</Link>
+                    <Link to="/publish-property" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Publish Property</Link>
+                  </>
+                )}
+                {userRole === 'tenant' && (
+                  <Link to="/saved-properties" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Saved Properties</Link>
+                )}
+                <Link to="/profile" className="block px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50">Profile Settings</Link>
+                <button 
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-secondary hover:bg-gray-50"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col space-y-2 mt-4 px-3 py-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-center border-primary text-primary hover:bg-primary hover:text-white"
+                  onClick={() => navigate('/auth/login')}
+                >
+                  Log In
+                </Button>
+                <Button 
+                  className="w-full justify-center bg-primary hover:bg-primary-hover text-white"
+                  onClick={handlePublishPropertyClick}
+                >
+                  Publish Property
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
