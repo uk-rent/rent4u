@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Example data
 const initialProperties = [
   {
     id: '1',
@@ -27,7 +26,6 @@ const initialProperties = [
     available: 'now',
     featured: true
   },
-  // ... resto de las propiedades
 ];
 
 export default function PropertiesPage() {
@@ -36,15 +34,14 @@ export default function PropertiesPage() {
     location: '',
     minPrice: '',
     maxPrice: '',
-    propertyType: '',
-    beds: '',
+    propertyType: 'all',  // Valor inicial cambiado
+    beds: 'any',          // Valor inicial cambiado
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     try {
-      // Simular carga inicial
       setIsLoading(false);
       console.log('Properties page mounted successfully');
     } catch (err) {
@@ -53,7 +50,6 @@ export default function PropertiesPage() {
     }
   }, []);
 
-  // Si hay un error, mostrarlo
   if (error) {
     return (
       <Layout>
@@ -65,7 +61,6 @@ export default function PropertiesPage() {
     );
   }
 
-  // Si está cargando, mostrar indicador
   if (isLoading) {
     return (
       <Layout>
@@ -95,9 +90,9 @@ export default function PropertiesPage() {
       property.price >= parseInt(filters.minPrice);
     const matchesMaxPrice = !filters.maxPrice || 
       property.price <= parseInt(filters.maxPrice);
-    const matchesPropertyType = !filters.propertyType || 
+    const matchesPropertyType = filters.propertyType === 'all' || 
       property.propertyType === filters.propertyType;
-    const matchesBeds = !filters.beds || 
+    const matchesBeds = filters.beds === 'any' || 
       property.beds === parseInt(filters.beds);
 
     return matchesLocation && matchesMinPrice && matchesMaxPrice && 
@@ -142,7 +137,7 @@ export default function PropertiesPage() {
               <SelectValue placeholder="Property Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="Apartment">Apartment</SelectItem>
               <SelectItem value="House">House</SelectItem>
               <SelectItem value="Studio">Studio</SelectItem>
@@ -157,7 +152,7 @@ export default function PropertiesPage() {
               <SelectValue placeholder="Bedrooms" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="any">Any</SelectItem>
               <SelectItem value="0">Studio</SelectItem>
               <SelectItem value="1">1</SelectItem>
               <SelectItem value="2">2</SelectItem>
