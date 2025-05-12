@@ -50,7 +50,7 @@
 
 @layer components {
   .hero-section {
-    background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), url('/lovable-uploads/6392d4b5-d076-4247-abd9-373a4b99d026.png');
+    background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), url('/lovable-uploads/393fd51c-b649-4938-a0e8-8fc0724dec69.png');
     background-size: cover;
     background-position: center;
   }

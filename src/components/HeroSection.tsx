@@ -16,12 +16,13 @@ const HeroSection = () => {
         <div className="flex flex-col md:flex-row md:items-center md:space-x-10">
           <div className="w-full md:w-1/2 text-white">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-              Find Your Perfect
-              <span className="block text-primary">London</span> Home
+              Find Your Ideal
+              <span className="block">Shared Room in</span>
+              <span className="text-primary">London</span>
             </h1>
             <p className="text-lg md:text-xl opacity-90 mb-8">
-              The premium platform for renting apartments, rooms, and shared houses in London,
-              tailored for young professionals and families.
+              Comfortable and affordable rooms in London's best locations, perfect for
+              students and young professionals.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-primary hover:bg-primary-hover text-white">
