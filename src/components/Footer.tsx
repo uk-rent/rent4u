@@ -79,7 +79,7 @@ const Footer = () => {
       </div>
 
       {/* WhatsApp Button */}
-      <a href="https://wa.me/442037691808" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 animate-wave z-50">
+      <a href="https://wa.me/442037691808" target="_blank" rel="noreferrer" className="fixed bottom-6 right-6 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 animate-wave z-50 px-[21px] py-[21px] my-[51px] mx-[9px]">
         <span className="sr-only">WhatsApp</span>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
           <path fillRule="evenodd" d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" clipRule="evenodd" />
