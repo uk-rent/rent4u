@@ -16,7 +16,8 @@ export interface Profile {
 
 export interface PropertyImage {
   url: string;
-  alt: string;
+  alt?: string;
+  public_id?: string; // ID de Cloudinary
 }
 
 export interface Amenity {
@@ -24,26 +25,71 @@ export interface Amenity {
   icon?: string;
 }
 
+export interface PropertyFeatures {
+  petsAllowed?: boolean;
+  furnished?: boolean;
+  airConditioning?: boolean;
+  heating?: boolean;
+  parking?: boolean;
+  elevator?: boolean;
+  balcony?: boolean;
+  garden?: boolean;
+  swimmingPool?: boolean;
+  securitySystem?: boolean;
+  internet?: boolean;
+  washingMachine?: boolean;
+  dishwasher?: boolean;
+  [key: string]: boolean | undefined;
+}
+
+export type PropertyType = 
+  | 'apartment' 
+  | 'house' 
+  | 'room' 
+  | 'studio' 
+  | 'commercial' 
+  | 'land' 
+  | 'other';
+
+export type PropertyStatus = 'draft' | 'published' | 'rented' | 'archived' | 'expired' | 'active' | 'inactive' | 'pending';
+
 export interface Property {
   id: string;
   title: string;
   description: string;
   address: string;
-  area: string;
-  postcode: string;
-  latitude: number | null;
-  longitude: number | null;
+  area?: string;
+  postcode?: string;
+  city?: string;
+  country?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   price: number;
-  beds: number;
-  baths: number;
-  propertyType: string;
-  status: 'active' | 'inactive' | 'pending';
-  is_draft: boolean;
-  is_featured: boolean;
-  owner_id: string | null;
+  currency?: string;
+  beds?: number;
+  baths?: number;
+  propertyType?: PropertyType | string;
+  status: PropertyStatus;
+  is_draft?: boolean;
+  is_featured?: boolean;
+  featured_until?: string;
+  ad_type?: string;
+  owner_id?: string | null;
   images: PropertyImage[];
-  amenities: Amenity[];
+  amenities?: Amenity[];
+  features?: PropertyFeatures;
   created_at: string;
   updated_at: string;
-  available: string;
+  available?: string;
+  listing_expires_at?: string;
+  views_count?: number;
+  contact_clicks?: number;
 }
+
+// Re-exportamos todos los tipos de los otros archivos
+export * from './user.types';
+export * from './subscription.types';
+export * from './property.types';
+export * from './payment.types';
+export * from './notification.types';
+export * from './api.types';
