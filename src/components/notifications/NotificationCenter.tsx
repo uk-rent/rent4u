@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Link } from 'react-router-dom';
 import { Notification, NotificationType } from '@/types/notification.types';
 import { getUserNotifications, markNotificationsAsRead, getUnreadNotificationsCount } from '@/lib/notification.service';
 import { useAuth } from '@/contexts/AuthContext';

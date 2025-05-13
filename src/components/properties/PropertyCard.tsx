@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, MapPin, Bed, Bath, SquareFootage } from 'lucide-react';
+import { Heart, MapPin, Bed, Bath, Square } from 'lucide-react';
 import { Property } from '@/types/property.types';
 import { cn } from '@/lib/utils';
 
@@ -118,7 +117,7 @@ export function PropertyCard({
             
             {property.area_sqm !== undefined && (
               <div className="flex items-center">
-                <SquareFootage className="h-4 w-4 mr-1" />
+                <Square className="h-4 w-4 mr-1" />
                 <span>{property.area_sqm} m²</span>
               </div>
             )}
