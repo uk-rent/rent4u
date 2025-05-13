@@ -24,6 +24,7 @@ export interface InitiatePaymentDto {
   plan_id: string;
   payment_method: PaymentMethod;
   currency?: string;
+  amount?: number; // Added this field as it's used in the payment service
   success_url?: string; // URL de redirección tras éxito
   cancel_url?: string;  // URL de redirección tras cancelación
 }

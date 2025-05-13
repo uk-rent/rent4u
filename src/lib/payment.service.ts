@@ -29,7 +29,7 @@ export const initiatePayment = async (
       .from('subscription_payments')
       .insert({
         user_id: userId,
-        amount: 0, // Se actualizará con el monto real luego
+        amount: paymentData.amount || 0,
         currency: paymentData.currency || 'USD',
         status: 'pending',
         payment_method: paymentData.payment_method
@@ -38,6 +38,7 @@ export const initiatePayment = async (
       .single();
 
     if (error) {
+      console.error('Error registering payment:', error);
       throw new Error(`Error al registrar el pago: ${error.message}`);
     }
 
@@ -49,6 +50,7 @@ export const initiatePayment = async (
       status: 'pending'
     };
   } catch (error: any) {
+    console.error('Error initiating payment:', error);
     return {
       success: false,
       message: `Error al iniciar el pago: ${error.message}`
@@ -81,6 +83,7 @@ export const recordPayment = async (
     .single();
 
   if (error) {
+    console.error('Error recording payment:', error);
     throw new ApiError(
       'Error al registrar el pago en la base de datos',
       'RECORD_PAYMENT_ERROR',
@@ -119,6 +122,7 @@ export const updatePaymentStatus = async (
     .single();
 
   if (error) {
+    console.error('Error updating payment status:', error);
     throw new ApiError(
       'Error al actualizar el estado del pago',
       'UPDATE_PAYMENT_ERROR',
@@ -141,6 +145,7 @@ export const getUserPaymentHistory = async (userId: string): Promise<Subscriptio
     .order('created_at', { ascending: false });
 
   if (error) {
+    console.error('Error fetching payment history:', error);
     throw new ApiError(
       'Error al obtener el historial de pagos',
       'PAYMENT_HISTORY_ERROR',
