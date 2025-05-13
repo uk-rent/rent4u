@@ -1,21 +1,8 @@
-
 // Tipo de propiedad
-export type PropertyType = 
-  | 'apartment' 
-  | 'house' 
-  | 'room' 
-  | 'studio' 
-  | 'commercial' 
-  | 'land' 
-  | 'other';
+export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'commercial' | 'land';
 
 // Estado de disponibilidad de la propiedad
-export type PropertyStatus = 
-  | 'draft'     // Borrador (no publicado)
-  | 'published' // Publicado y visible
-  | 'rented'    // Alquilado (no disponible)
-  | 'archived'  // Archivado manualmente
-  | 'expired';  // Expirado automáticamente
+export type PropertyStatus = 'available' | 'rented' | 'pending' | 'unavailable';
 
 // Tipo de anuncio
 export type AdType = 'standard' | 'featured';
@@ -26,64 +13,66 @@ export type PromotionStatus = 'active' | 'inactive' | 'expired';
 // Visibilidad del anuncio
 export type Visibility = 'public' | 'private' | 'unlisted';
 
+// Tipo de listado de propiedad
+export type PropertyListingType = 'rent' | 'sale' | 'both';
+
 // Características de una propiedad
 export interface PropertyFeatures {
-  petsAllowed?: boolean;
-  furnished?: boolean;
-  airConditioning?: boolean;
-  heating?: boolean;
-  parking?: boolean;
-  elevator?: boolean;
-  balcony?: boolean;
-  garden?: boolean;
-  swimmingPool?: boolean;
-  securitySystem?: boolean;
-  internet?: boolean;
-  washingMachine?: boolean;
-  dishwasher?: boolean;
-  [key: string]: boolean | undefined; // Para características adicionales
+  bedrooms: number;
+  bathrooms: number;
+  area_sqm: number;
+  furnished: boolean;
+  petsAllowed: boolean;
+  airConditioning: boolean;
+  heating: boolean;
+  parking: boolean;
+  elevator: boolean;
+  yearBuilt?: number;
+  floor?: number;
+  totalFloors?: number;
 }
 
 // Imagen de la propiedad
 export interface PropertyImage {
+  id: string;
   url: string;
-  public_id: string; // ID de Cloudinary
-  alt?: string;
+  alt: string;
+  isMain: boolean;
+  order: number;
+  width: number;
+  height: number;
 }
 
 // Anuncio de propiedad completo
 export interface Property {
   id: string;
-  user_id: string;
   title: string;
-  description: string | null;
-  address: string | null;
-  city: string | null;
-  country: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  price: number | null;
-  currency: string;
-  property_type: PropertyType | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  area_sqm: number | null;
-  features: PropertyFeatures | null;
-  images: PropertyImage[];
-  virtual_tour_url: string | null;
+  description: string;
+  type: PropertyType;
   status: PropertyStatus;
-  availability_date: string | null;
+  listingType: PropertyListingType;
+  price: number;
+  currency: string;
+  deposit?: number;
+  location: PropertyLocation;
+  features: PropertyFeatures;
+  images: PropertyImage[];
+  amenities: PropertyAmenity[];
+  ownerId: string;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+  rating?: number;
+  reviewCount?: number;
   is_featured: boolean;
-  featured_until: string | null;
-  ad_type: AdType;
-  views_count: number;
-  contact_clicks: number;
-  listing_created_at: string;
-  listing_expires_at: string | null;
-  promotion_status: PromotionStatus;
-  visibility: Visibility;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  metadata?: Record<string, any>;
 }
 
 // DTO para crear un anuncio
@@ -135,4 +124,89 @@ export interface PropertyFilters {
   sort_by?: 'price_asc' | 'price_desc' | 'date_asc' | 'date_desc';
   page?: number;
   limit?: number;
+}
+
+// Tipos adicionales para los nuevos componentes
+export interface PropertyFilterOptions {
+  search?: string;
+  type?: PropertyType[];
+  status?: PropertyStatus[];
+  listingType?: PropertyListingType[];
+  minPrice?: number;
+  maxPrice?: number;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  features?: {
+    bedrooms?: number;
+    bathrooms?: number;
+    minArea?: number;
+    maxArea?: number;
+    furnished?: boolean;
+    petsAllowed?: boolean;
+  };
+  amenities?: string[];
+  sortBy?: 'price' | 'date' | 'rating';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export interface PropertySearchParams extends PropertyFilterOptions {
+  query?: string;
+  bounds?: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
+}
+
+export interface PropertyBooking {
+  id: string;
+  propertyId: string;
+  userId: string;
+  startDate: string;
+  endDate: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  totalAmount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PropertyLocation {
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+export interface PropertyAmenity {
+  id: string;
+  name: string;
+  category: string;
+  icon?: string;
+}
+
+export interface PropertyStats {
+  totalProperties: number;
+  availableProperties: number;
+  rentedProperties: number;
+  averagePrice: number;
+  averageRating: number;
+  propertyTypes: {
+    type: PropertyType;
+    count: number;
+  }[];
+  locations: {
+    city: string;
+    count: number;
+  }[];
 }

@@ -1,26 +1,27 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { UserWithProfile, UserRole } from '@/types/user.types';
+import { UserWithProfile, UserRole, UserProfile } from '@/types/user.types';
 
-type AuthContextType = {
+interface AuthContextType {
   session: Session | null;
-  user: UserWithProfile | null;
+  user: UserProfile | null;
   userRole: UserRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, firstName: string, lastName: string, role: UserRole) => Promise<void>;
+  signUp: (data: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: { first_name?: string; last_name?: string; phone?: string; avatar_url?: string }) => Promise<void>;
-};
+  resetPassword: (email: string) => Promise<void>;
+  confirmPasswordReset: (token: string, password: string) => Promise<void>;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<UserWithProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -113,106 +114,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: UserRole) => {
+  const signUp = async (data: any) => {
     try {
-      setLoading(true);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            role: role
-          }
-        }
-      });
-
-      if (error) {
-        toast({
-          title: 'Error de registro',
-          description: error.message,
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      toast({
-        title: 'Registro exitoso',
-        description: 'Tu cuenta ha sido creada con éxito.',
-      });
-      
-    } catch (error: any) {
-      toast({
-        title: 'Error inesperado',
-        description: error.message || 'Ha ocurrido un error inesperado',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
+      // Aquí iría la llamada a la API para registrarse
+      // const response = await api.signUp(data);
+      // setUser(response.data.user);
+    } catch (error) {
+      throw error;
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast({
-          title: 'Error de inicio de sesión',
-          description: error.message,
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      toast({
-        title: 'Sesión iniciada',
-        description: '¡Bienvenido de nuevo!',
-      });
-      
-    } catch (error: any) {
-      toast({
-        title: 'Error inesperado',
-        description: error.message || 'Ha ocurrido un error inesperado',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
+      // Aquí iría la llamada a la API para iniciar sesión
+      // const response = await api.signIn(email, password);
+      // setUser(response.data.user);
+    } catch (error) {
+      throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        toast({
-          title: 'Error al cerrar sesión',
-          description: error.message,
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      toast({
-        title: 'Sesión cerrada',
-        description: 'Has cerrado sesión con éxito',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error inesperado',
-        description: error.message || 'Ha ocurrido un error inesperado',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
+      // Aquí iría la llamada a la API para cerrar sesión
+      // await api.signOut();
+      setUser(null);
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -257,6 +185,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      // Aquí iría la llamada a la API para solicitar el restablecimiento de contraseña
+      // await api.resetPassword(email);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const confirmPasswordReset = async (token: string, password: string) => {
+    try {
+      // Aquí iría la llamada a la API para confirmar el restablecimiento de contraseña
+      // await api.confirmPasswordReset(token, password);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const value = {
     session,
     user,
@@ -266,6 +212,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signIn,
     signOut,
     updateProfile,
+    resetPassword,
+    confirmPasswordReset,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -274,7 +222,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

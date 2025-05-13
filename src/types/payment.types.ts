@@ -1,9 +1,8 @@
-
 // Métodos de pago soportados
-export type PaymentMethod = 'stripe' | 'paypal' | 'manual';
+export type PaymentMethod = 'credit_card' | 'debit_card' | 'bank_transfer' | 'paypal';
 
 // Estados de pago
-export type PaymentStatus = 'pending' | 'succeeded' | 'failed' | 'refunded';
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 
 // Pago de suscripción
 export interface SubscriptionPayment {
@@ -49,4 +48,45 @@ export interface PaymentWebhookData {
   currency?: string;
   metadata?: Record<string, any>;
   created_at?: number;
+}
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  method: PaymentMethod;
+  transactionId?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Campos adicionales
+  refundAmount?: number;
+  refundReason?: string;
+  paymentDetails?: {
+    cardLast4?: string;
+    cardBrand?: string;
+    bankName?: string;
+    accountNumber?: string;
+  };
+}
+
+export interface CreatePaymentDto {
+  bookingId: string;
+  amount: number;
+  currency: string;
+  method: PaymentMethod;
+  paymentDetails: {
+    cardNumber?: string;
+    expiryDate?: string;
+    cvv?: string;
+    cardholderName?: string;
+    bankAccount?: string;
+  };
+}
+
+export interface RefundPaymentDto {
+  paymentId: string;
+  amount: number;
+  reason: string;
 }
