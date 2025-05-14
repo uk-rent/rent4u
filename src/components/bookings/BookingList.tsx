@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,8 +47,7 @@ export function BookingList({
         .from('bookings')
         .select(`
           *,
-          property:properties(*),
-          tenant:users!bookings_tenant_id_fkey(*)
+          property:properties(*)
         `)
         .order('created_at', { ascending: false });
 
@@ -56,7 +56,7 @@ export function BookingList({
         query = query.eq('status', filter.status);
       }
       if (filter.propertyId) {
-        query = query.eq('property_id', filter.propertyId);
+        query = query.eq('room_id', filter.propertyId);
       }
       if (filter.userId) {
         query = query.eq('tenant_id', filter.userId);
@@ -65,7 +65,18 @@ export function BookingList({
       const { data, error } = await query;
 
       if (error) throw error;
-      setBookings(data || []);
+      
+      // Convert the database response to our frontend format
+      const formattedBookings: Booking[] = (data || []).map(booking => ({
+        ...booking,
+        propertyId: booking.room_id,
+        userId: booking.tenant_id,
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        currency: booking.property?.currency || "USD"
+      }));
+      
+      setBookings(formattedBookings);
     } catch (error) {
       toast({
         title: 'Error',
@@ -158,17 +169,17 @@ export function BookingList({
                     className="cursor-pointer hover:underline"
                     onClick={() => navigate(`/properties/${booking.propertyId}`)}
                   >
-                    {booking.property?.title}
+                    {booking.property?.title || 'Property'}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <div>From: {format(new Date(booking.startDate), 'PPP')}</div>
-                    <div>To: {format(new Date(booking.endDate), 'PPP')}</div>
+                    <div>From: {format(new Date(booking.start_date || booking.startDate || ''), 'PPP')}</div>
+                    <div>To: {format(new Date(booking.end_date || booking.endDate || ''), 'PPP')}</div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  {booking.currency} {booking.totalAmount}
+                  {booking.currency || 'USD'} {booking.totalAmount || 0}
                 </TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(booking.status)}>
@@ -177,9 +188,9 @@ export function BookingList({
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={booking.paymentStatus === 'paid' ? 'default' : 'secondary'}
+                    variant={booking.payment_status === 'paid' ? 'default' : 'secondary'}
                   >
-                    {booking.paymentStatus}
+                    {booking.payment_status}
                   </Badge>
                 </TableCell>
                 {showActions && (

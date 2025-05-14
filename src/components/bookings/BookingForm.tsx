@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +23,7 @@ export function BookingForm({ property, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateBookingDto>({
+  const [formData, setFormData] = useState<CreateBookingDto & { paymentMethod?: string }>({
     propertyId: property.id,
     startDate: '',
     endDate: '',
@@ -70,8 +71,8 @@ export function BookingForm({ property, onSuccess }: BookingFormProps) {
         .from('bookings')
         .insert([
           {
-            property_id: property.id,
-            tenant_id: user.id,
+            room_id: property.id, // Use room_id instead of property_id to match the schema
+            tenant_id: user.id,    // Use tenant_id instead of user_id to match the schema
             start_date: selectedDates.from.toISOString(),
             end_date: selectedDates.to.toISOString(),
             total_amount: calculateTotalAmount(),
@@ -169,15 +170,19 @@ export function BookingForm({ property, onSuccess }: BookingFormProps) {
           <div className="space-y-2">
             <Label htmlFor="paymentMethod">Payment Method</Label>
             <Select
-              id="paymentMethod"
               value={formData.paymentMethod}
               onValueChange={(value) =>
                 setFormData({ ...formData, paymentMethod: value })
               }
             >
-              <option value="credit_card">Credit Card</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="paypal">PayPal</option>
+              <SelectTrigger>
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="credit_card">Credit Card</SelectItem>
+                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                <SelectItem value="paypal">PayPal</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 

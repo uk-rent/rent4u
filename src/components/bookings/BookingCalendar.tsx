@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +35,17 @@ export function BookingCalendar({
         .in('status', ['confirmed', 'pending']);
 
       if (error) throw error;
-      setBookings(data || []);
+      
+      // Convert database format to our frontend Booking format
+      const formattedBookings: Booking[] = (data || []).map(booking => ({
+        ...booking,
+        propertyId: booking.property_id || booking.room_id,
+        userId: booking.tenant_id,
+        startDate: booking.start_date,
+        endDate: booking.end_date
+      }));
+      
+      setBookings(formattedBookings);
     } catch (error) {
       toast({
         title: 'Error',
@@ -49,8 +60,8 @@ export function BookingCalendar({
   const isDateBooked = (date: Date) => {
     return bookings.some((booking) =>
       isWithinInterval(date, {
-        start: new Date(booking.startDate),
-        end: new Date(booking.endDate),
+        start: new Date(booking.startDate || booking.start_date),
+        end: new Date(booking.endDate || booking.end_date),
       })
     );
   };
