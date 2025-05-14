@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Booking, BookingStatus } from '@/types/booking.types';
 import { toast } from '@/components/ui/use-toast';
+import { mapDatabaseBookingToBooking } from '@/utils/booking.mapper';
 
 export function useBookings() {
   const [loading, setLoading] = useState(false);
@@ -56,15 +57,7 @@ export function useBookings() {
       if (error) throw error;
       
       // Format bookings to match our frontend format
-      const formattedBookings: Booking[] = (data || []).map(booking => ({
-        ...booking,
-        propertyId: booking.room_id,
-        userId: booking.tenant_id,
-        startDate: booking.start_date,
-        endDate: booking.end_date,
-        totalAmount: booking.total_amount,
-        currency: booking.property?.currency || "USD"
-      }));
+      const formattedBookings = data ? data.map(mapDatabaseBookingToBooking) : [];
       
       setBookings(formattedBookings);
       return formattedBookings;

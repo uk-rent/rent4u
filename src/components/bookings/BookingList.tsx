@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { mapDatabaseBookingToBooking } from '@/utils/booking.mapper';
 import {
   Table,
   TableBody,
@@ -67,16 +68,10 @@ export function BookingList({
       if (error) throw error;
       
       // Convert the database response to our frontend format
-      const formattedBookings: Booking[] = (data || []).map(booking => ({
-        ...booking,
-        propertyId: booking.room_id,
-        userId: booking.tenant_id,
-        startDate: booking.start_date,
-        endDate: booking.end_date,
-        currency: booking.property?.currency || "USD"
-      }));
-      
-      setBookings(formattedBookings);
+      if (data) {
+        const formattedBookings = data.map(mapDatabaseBookingToBooking);
+        setBookings(formattedBookings);
+      }
     } catch (error) {
       toast({
         title: 'Error',

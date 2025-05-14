@@ -17,6 +17,7 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import BookingsPage from "./pages/bookings/BookingsPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             {/* Protected Tenant Routes */}
             <Route element={<ProtectedRoute requiredRole="tenant" />}>
               <Route path="/saved-properties" element={<div>Saved Properties Page</div>} />
+              <Route path="/bookings" element={<BookingsPage />} />
             </Route>
 
             {/* Protected Landlord Routes */}

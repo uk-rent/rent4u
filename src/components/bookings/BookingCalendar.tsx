@@ -6,6 +6,7 @@ import { Booking } from '@/types/booking.types';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isWithinInterval } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
+import { mapDatabaseBookingToBooking } from '@/utils/booking.mapper';
 
 interface BookingCalendarProps {
   propertyId: string;
@@ -31,21 +32,16 @@ export function BookingCalendar({
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .eq('property_id', propertyId)
+        .eq('room_id', propertyId)
         .in('status', ['confirmed', 'pending']);
 
       if (error) throw error;
       
-      // Convert database format to our frontend Booking format
-      const formattedBookings: Booking[] = (data || []).map(booking => ({
-        ...booking,
-        propertyId: booking.property_id || booking.room_id,
-        userId: booking.tenant_id,
-        startDate: booking.start_date,
-        endDate: booking.end_date
-      }));
-      
-      setBookings(formattedBookings);
+      if (data) {
+        // Convert database format to our frontend Booking format
+        const formattedBookings = data.map(mapDatabaseBookingToBooking);
+        setBookings(formattedBookings);
+      }
     } catch (error) {
       toast({
         title: 'Error',

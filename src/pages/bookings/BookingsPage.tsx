@@ -8,7 +8,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { BookingStatus } from '@/types/booking.types';
 
 export default function BookingsPage() {
-  const { user, userRole } = useAuth();
+  const { user } = useAuth();
   const { fetchBookings, loading } = useBookings();
   const [activeTab, setActiveTab] = React.useState<BookingStatus | 'all'>('all');
   

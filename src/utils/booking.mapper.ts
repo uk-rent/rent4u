@@ -9,6 +9,8 @@ export function mapDatabaseBookingToBooking(dbBooking: any): Booking {
     startDate: dbBooking.start_date,
     endDate: dbBooking.end_date,
     totalAmount: dbBooking.total_amount,
+    status: dbBooking.status || 'pending',
+    payment_status: dbBooking.payment_status || 'pending',
     currency: dbBooking.property?.currency || "USD"
   };
 }

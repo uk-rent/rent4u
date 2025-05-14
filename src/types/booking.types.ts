@@ -34,7 +34,7 @@ export interface CreateBookingDto {
   endDate: string;
   numberOfGuests?: number;
   specialRequests?: string;
-  paymentMethod?: string; // Add this to fix the TS error
+  paymentMethod?: string;
 }
 
 export interface BookingFilterOptions {
