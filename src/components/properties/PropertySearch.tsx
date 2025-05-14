@@ -18,12 +18,12 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
     e.preventDefault();
     
     // Create a proper location filter object
-    const locationObj = location ? { city: location } : undefined;
+    const locationFilter = location ? { city: location } : undefined;
     
     onSearch({
       query,
       location: location || undefined,
-      locationFilter: locationObj,
+      locationFilter,
       page: 1
     });
   };

@@ -5,10 +5,10 @@ export interface Review {
   userId: string;
   rating: number;
   comment: string;
+  response?: string;
   createdAt: string;
   updatedAt: string;
-  response?: string;  // Added response field
-  user?: {
+  user: {
     id: string;
     name: string;
     avatar?: string;
@@ -18,7 +18,9 @@ export interface Review {
 export interface ReviewStats {
   averageRating: number;
   totalReviews: number;
-  ratingDistribution: { [key: number]: number };
+  ratingDistribution: {
+    [key: number]: number;
+  };
 }
 
 export interface CreateReviewDto {
@@ -30,4 +32,5 @@ export interface CreateReviewDto {
 export interface UpdateReviewDto {
   rating?: number;
   comment?: string;
+  response?: string;
 }
