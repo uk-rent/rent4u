@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Property, PropertyFilterOptions, PropertyStats } from '@/types/property.types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 
@@ -144,4 +144,4 @@ export function useProperties() {
     resetFilters,
     refetch: fetchProperties,
   };
-} 
+}

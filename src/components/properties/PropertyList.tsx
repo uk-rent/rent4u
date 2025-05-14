@@ -6,7 +6,7 @@ import { PropertyFilter as Filter } from './PropertyFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GridIcon, ListIcon, SearchIcon } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -222,4 +222,4 @@ export function PropertyList({
       </div>
     </div>
   );
-} 
+}
