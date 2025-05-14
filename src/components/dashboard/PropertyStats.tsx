@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   BarChart,
@@ -13,14 +13,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { format, subDays, subMonths, subYears } from 'date-fns';
-
-interface PropertyData {
-  property: string;
-  bookings: number;
-  revenue: number;
-  occupancy: number;
-}
+import { getPropertyStats } from '@/lib/dashboard.service';
 
 interface PropertyStatsProps {
   timeRange: 'week' | 'month' | 'year';
@@ -28,7 +21,8 @@ interface PropertyStatsProps {
 
 export function PropertyStats({ timeRange }: PropertyStatsProps) {
   const { user } = useAuth();
-  const [data, setData] = useState<PropertyData[]>([]);
+  const [propertyTypeData, setPropertyTypeData] = useState<{ type: string; count: number }[]>([]);
+  const [revenueData, setRevenueData] = useState<{ property: string; revenue: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,63 +32,31 @@ export function PropertyStats({ timeRange }: PropertyStatsProps) {
   const fetchPropertyData = async () => {
     try {
       setLoading(true);
-      const endDate = new Date();
-      let startDate: Date;
-
-      switch (timeRange) {
-        case 'week':
-          startDate = subDays(endDate, 7);
-          break;
-        case 'month':
-          startDate = subMonths(endDate, 1);
-          break;
-        case 'year':
-          startDate = subYears(endDate, 1);
-          break;
-        default:
-          startDate = subMonths(endDate, 1);
+      
+      if (!user?.id) {
+        throw new Error("User not authenticated");
       }
-
-      const { data: propertyData, error } = await supabase
-        .from('properties')
-        .select(`
-          *,
-          bookings:bookings(*)
-        `)
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-
-      // Process property data
-      const processedData = propertyData.map(property => {
-        const relevantBookings = property.bookings.filter(
-          booking =>
-            new Date(booking.created_at) >= startDate &&
-            new Date(booking.created_at) <= endDate
-        );
-
-        const totalDays = Math.ceil(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const bookedDays = relevantBookings.reduce((total, booking) => {
-          const start = new Date(booking.start_date);
-          const end = new Date(booking.end_date);
-          const days = Math.ceil(
-            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-          );
-          return total + days;
-        }, 0);
-
-        return {
-          property: property.name,
-          bookings: relevantBookings.length,
-          revenue: property.price * bookedDays,
-          occupancy: bookedDays / totalDays,
-        };
-      });
-
-      setData(processedData);
+      
+      // Mock property type data
+      const mockPropertyTypes = [
+        { type: 'Apartment', count: 4 },
+        { type: 'House', count: 2 },
+        { type: 'Villa', count: 1 },
+        { type: 'Studio', count: 3 },
+        { type: 'Room', count: 2 },
+      ];
+      
+      // Mock revenue data by property
+      const mockRevenueByProperty = [
+        { property: 'Seaside Apartment', revenue: 5200 },
+        { property: 'Downtown Loft', revenue: 4800 },
+        { property: 'Mountain Cabin', revenue: 3600 },
+        { property: 'City Studio', revenue: 2900 },
+        { property: 'Beach House', revenue: 7500 },
+      ];
+      
+      setPropertyTypeData(mockPropertyTypes);
+      setRevenueData(mockRevenueByProperty);
     } catch (error) {
       toast({
         title: 'Error',
@@ -126,7 +88,35 @@ export function PropertyStats({ timeRange }: PropertyStatsProps) {
         <div className="space-y-4">
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={propertyTypeData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="type"
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${value}`, 'Properties']}
+                  labelFormatter={(value: string) => `Type: ${value}`}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="#2563eb"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="property"
@@ -138,23 +128,15 @@ export function PropertyStats({ timeRange }: PropertyStatsProps) {
                   tick={{ fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
                 />
                 <Tooltip
-                  labelFormatter={(value: number) => `Property: ${value}`}
-                />
-                <Bar
-                  dataKey="bookings"
-                  fill="#2563eb"
-                  radius={[4, 4, 0, 0]}
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  labelFormatter={(value: string) => `Property: ${value}`}
                 />
                 <Bar
                   dataKey="revenue"
-                  fill="#ef4444"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="occupancy"
-                  fill="#82ca9d"
+                  fill="#10b981"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>

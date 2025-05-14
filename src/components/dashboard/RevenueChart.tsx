@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   LineChart,
@@ -12,7 +12,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { format, subDays, subMonths, subYears, eachDayOfInterval, eachMonthOfInterval } from 'date-fns';
+import { getRevenueChartData } from '@/lib/dashboard.service';
 
 interface RevenueData {
   date: string;
@@ -35,57 +35,13 @@ export function RevenueChart({ timeRange }: RevenueChartProps) {
   const fetchRevenueData = async () => {
     try {
       setLoading(true);
-      const endDate = new Date();
-      let startDate: Date;
-      let interval: 'day' | 'month';
-
-      switch (timeRange) {
-        case 'week':
-          startDate = subDays(endDate, 7);
-          interval = 'day';
-          break;
-        case 'month':
-          startDate = subMonths(endDate, 1);
-          interval = 'day';
-          break;
-        case 'year':
-          startDate = subYears(endDate, 1);
-          interval = 'month';
-          break;
-        default:
-          startDate = subMonths(endDate, 1);
-          interval = 'day';
+      
+      if (!user?.id) {
+        throw new Error("User not authenticated");
       }
 
-      const { data: revenueData, error } = await supabase
-        .from('revenue')
-        .select('*')
-        .eq('user_id', user?.id)
-        .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString())
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-
-      // Generate all dates in the range
-      const dates = interval === 'day'
-        ? eachDayOfInterval({ start: startDate, end: endDate })
-        : eachMonthOfInterval({ start: startDate, end: endDate });
-
-      // Map revenue data to all dates
-      const formattedData = dates.map(date => {
-        const dateStr = format(date, interval === 'day' ? 'MMM dd' : 'MMM yyyy');
-        const revenue = revenueData?.find(
-          r => format(new Date(r.date), interval === 'day' ? 'MMM dd' : 'MMM yyyy') === dateStr
-        )?.amount || 0;
-
-        return {
-          date: dateStr,
-          revenue,
-        };
-      });
-
-      setData(formattedData);
+      const revenueData = await getRevenueChartData(user.id, timeRange);
+      setData(revenueData);
     } catch (error) {
       toast({
         title: 'Error',
@@ -121,7 +77,8 @@ export function RevenueChart({ timeRange }: RevenueChartProps) {
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
               />
               <Tooltip
-                labelFormatter={(value: { date: string }) => value.date}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                labelFormatter={(value) => `Date: ${value}`}
               />
               <Line
                 type="monotone"

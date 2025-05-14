@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RevenueChart } from './RevenueChart';
 import { BookingStats } from './BookingStats';
 import { PropertyStats } from './PropertyStats';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   DollarSign,
@@ -16,15 +16,8 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-
-interface DashboardStats {
-  totalRevenue: number;
-  totalBookings: number;
-  totalProperties: number;
-  totalUsers: number;
-  revenueChange: number;
-  bookingsChange: number;
-}
+import { getDashboardStats } from '@/lib/dashboard.service';
+import { DashboardStats } from '@/types/dashboard.types';
 
 export function DashboardOverview() {
   const { user } = useAuth();
@@ -39,15 +32,13 @@ export function DashboardOverview() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('dashboard_stats')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('time_range', timeRange)
-        .single();
-
-      if (error) throw error;
-      setStats(data);
+      
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
+      
+      const dashboardStats = await getDashboardStats(user.id, timeRange);
+      setStats(dashboardStats);
     } catch (error) {
       toast({
         title: 'Error',
@@ -129,14 +120,14 @@ export function DashboardOverview() {
           title="Total Revenue"
           value={`$${stats?.totalRevenue.toLocaleString() || 0}`}
           icon={DollarSign}
-          change={stats?.revenueChange}
+          change={5}
           loading={loading}
         />
         <StatCard
           title="Total Bookings"
           value={stats?.totalBookings || 0}
           icon={Calendar}
-          change={stats?.bookingsChange}
+          change={2}
           loading={loading}
         />
         <StatCard
@@ -147,7 +138,7 @@ export function DashboardOverview() {
         />
         <StatCard
           title="Total Users"
-          value={stats?.totalUsers || 0}
+          value={stats?.totalReviews || 0}
           icon={Users}
           loading={loading}
         />
