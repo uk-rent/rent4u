@@ -1,8 +1,9 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Property, PropertyFilterOptions, PropertyStats } from '@/types/property.types';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getProperties } from '@/lib/property.service';
 
 export function useProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -17,81 +18,19 @@ export function useProperties() {
       setLoading(true);
       setError(null);
 
-      let query = supabase
-        .from('properties')
-        .select(`
-          *,
-          owner:profiles!properties_owner_id_fkey(*),
-          images:property_images(*),
-          amenities:property_amenities(*)
-        `)
-        .order('created_at', { ascending: false });
+      const response = await getProperties({
+        search: debouncedFilters.search,
+        propertyType: debouncedFilters.type?.[0],
+        minPrice: debouncedFilters.minPrice,
+        maxPrice: debouncedFilters.maxPrice,
+        beds: debouncedFilters.features?.bedrooms,
+        baths: debouncedFilters.features?.bathrooms,
+        featured: false,
+        limit: debouncedFilters.limit || 10,
+        page: debouncedFilters.page || 1
+      });
 
-      // Apply filters
-      if (debouncedFilters.type?.length) {
-        query = query.in('type', debouncedFilters.type);
-      }
-      if (debouncedFilters.status?.length) {
-        query = query.in('status', debouncedFilters.status);
-      }
-      if (debouncedFilters.listingType?.length) {
-        query = query.in('listing_type', debouncedFilters.listingType);
-      }
-      if (debouncedFilters.minPrice) {
-        query = query.gte('price', debouncedFilters.minPrice);
-      }
-      if (debouncedFilters.maxPrice) {
-        query = query.lte('price', debouncedFilters.maxPrice);
-      }
-      if (debouncedFilters.location?.city) {
-        query = query.ilike('location->city', `%${debouncedFilters.location.city}%`);
-      }
-      if (debouncedFilters.location?.state) {
-        query = query.ilike('location->state', `%${debouncedFilters.location.state}%`);
-      }
-      if (debouncedFilters.location?.country) {
-        query = query.ilike('location->country', `%${debouncedFilters.location.country}%`);
-      }
-      if (debouncedFilters.features?.bedrooms) {
-        query = query.gte('features->bedrooms', debouncedFilters.features.bedrooms);
-      }
-      if (debouncedFilters.features?.bathrooms) {
-        query = query.gte('features->bathrooms', debouncedFilters.features.bathrooms);
-      }
-      if (debouncedFilters.features?.minArea) {
-        query = query.gte('features->area_sqm', debouncedFilters.features.minArea);
-      }
-      if (debouncedFilters.features?.maxArea) {
-        query = query.lte('features->area_sqm', debouncedFilters.features.maxArea);
-      }
-      if (debouncedFilters.features?.furnished !== undefined) {
-        query = query.eq('features->furnished', debouncedFilters.features.furnished);
-      }
-      if (debouncedFilters.features?.petsAllowed !== undefined) {
-        query = query.eq('features->petsAllowed', debouncedFilters.features.petsAllowed);
-      }
-      if (debouncedFilters.amenities?.length) {
-        query = query.contains('amenities', debouncedFilters.amenities);
-      }
-
-      // Apply sorting
-      if (debouncedFilters.sortBy) {
-        query = query.order(debouncedFilters.sortBy, {
-          ascending: debouncedFilters.sortOrder === 'asc',
-        });
-      }
-
-      // Apply pagination
-      if (debouncedFilters.page && debouncedFilters.limit) {
-        const from = (debouncedFilters.page - 1) * debouncedFilters.limit;
-        const to = from + debouncedFilters.limit - 1;
-        query = query.range(from, to);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setProperties(data || []);
+      setProperties(response.data);
     } catch (error) {
       setError('Failed to fetch properties');
       toast({
@@ -106,10 +45,31 @@ export function useProperties() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const { data, error } = await supabase.rpc('get_property_stats');
-
-      if (error) throw error;
-      setStats(data);
+      // Mock stats
+      const mockStats: PropertyStats = {
+        totalProperties: 150,
+        availableProperties: 98,
+        rentedProperties: 52,
+        averagePrice: 1250,
+        averageRating: 4.2,
+        propertyTypes: [
+          { type: 'apartment', count: 75 },
+          { type: 'house', count: 45 },
+          { type: 'room', count: 15 },
+          { type: 'studio', count: 10 },
+          { type: 'commercial', count: 5 }
+        ],
+        locations: [
+          { city: 'London', count: 50 },
+          { city: 'Manchester', count: 30 },
+          { city: 'Birmingham', count: 25 },
+          { city: 'Liverpool', count: 20 },
+          { city: 'Leeds', count: 15 },
+          { city: 'Other', count: 10 }
+        ]
+      };
+      
+      setStats(mockStats);
     } catch (error) {
       console.error('Error fetching property stats:', error);
     }

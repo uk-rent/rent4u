@@ -1,24 +1,25 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Property, PropertyFilter } from '@/types/property.types';
+import { Property, PropertyFilterOptions } from '@/types/property.types';
 import { PropertyCard } from './PropertyCard';
-import { PropertyFilter as Filter } from './PropertyFilter';
+import { PropertyFilter } from './PropertyFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GridIcon, ListIcon, SearchIcon } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getProperties } from '@/lib/property.service';
 
 interface PropertyListProps {
-  initialFilter?: PropertyFilter;
+  initialFilter?: PropertyFilterOptions;
   showFilter?: boolean;
   limit?: number;
   savedProperties?: string[];
   onSaveToggle?: (propertyId: string, saved: boolean) => void;
   loading?: boolean;
-  onFilterChange?: (filter: PropertyFilter) => void;
+  onFilterChange?: (filter: PropertyFilterOptions) => void;
 }
 
 export function PropertyList({
@@ -33,7 +34,7 @@ export function PropertyList({
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<PropertyFilter>(initialFilter || {});
+  const [filter, setFilter] = useState<PropertyFilterOptions>(initialFilter || {});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -45,63 +46,21 @@ export function PropertyList({
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('properties')
-        .select(`
-          *,
-          owner:profiles!properties_owner_id_fkey(*),
-          images:property_images(*)
-        `)
-        .order('created_at', { ascending: false });
 
-      // Apply filters
-      if (filter.type?.length) {
-        query = query.in('type', filter.type);
-      }
-      if (filter.minPrice) {
-        query = query.gte('price', filter.minPrice);
-      }
-      if (filter.maxPrice) {
-        query = query.lte('price', filter.maxPrice);
-      }
-      if (filter.bedrooms) {
-        query = query.gte('features->bedrooms', filter.bedrooms);
-      }
-      if (filter.bathrooms) {
-        query = query.gte('features->bathrooms', filter.bathrooms);
-      }
-      if (filter.furnished !== undefined) {
-        query = query.eq('features->furnished', filter.furnished);
-      }
-      if (filter.petsAllowed !== undefined) {
-        query = query.eq('features->petsAllowed', filter.petsAllowed);
-      }
-      if (filter.location?.city) {
-        query = query.ilike('location->city', `%${filter.location.city}%`);
-      }
-      if (filter.location?.state) {
-        query = query.ilike('location->state', `%${filter.location.state}%`);
-      }
-      if (filter.location?.country) {
-        query = query.ilike('location->country', `%${filter.location.country}%`);
-      }
+      // Use the property service instead of direct Supabase calls
+      const response = await getProperties({
+        search: debouncedSearchQuery,
+        propertyType: filter.type?.[0],
+        minPrice: filter.minPrice,
+        maxPrice: filter.maxPrice,
+        beds: filter.features?.bedrooms,
+        baths: filter.features?.bathrooms,
+        featured: false,
+        limit: limit || 10,
+        page: filter.page || 1
+      });
 
-      // Apply search query
-      if (debouncedSearchQuery) {
-        query = query.or(
-          `title.ilike.%${debouncedSearchQuery}%,description.ilike.%${debouncedSearchQuery}%,location->address.ilike.%${debouncedSearchQuery}%`
-        );
-      }
-
-      // Apply limit if specified
-      if (limit) {
-        query = query.limit(limit);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setProperties(data || []);
+      setProperties(response.data);
     } catch (error) {
       toast({
         title: 'Error',
@@ -113,7 +72,7 @@ export function PropertyList({
     }
   };
 
-  const handleFilterChange = (newFilter: PropertyFilter) => {
+  const handleFilterChange = (newFilter: PropertyFilterOptions) => {
     setFilter(newFilter);
     onFilterChange?.(newFilter);
   };
@@ -178,8 +137,8 @@ export function PropertyList({
         {/* Filter Sidebar */}
         {showFilter && (
           <div className="w-full lg:w-64 flex-shrink-0">
-            <Filter
-              initialFilter={filter}
+            <PropertyFilter
+              initialFilters={filter}
               onFilterChange={handleFilterChange}
             />
           </div>
@@ -200,11 +159,21 @@ export function PropertyList({
               {properties.map((property) => (
                 <PropertyCard
                   key={property.id}
-                  property={property}
-                  viewMode={viewMode}
-                  isSaved={savedProperties.includes(property.id)}
-                  onSaveToggle={onSaveToggle}
-                  onClick={() => navigate(`/properties/${property.id}`)}
+                  id={property.id}
+                  title={property.title}
+                  location={property.location?.address || ''}
+                  postcode={property.location?.postalCode || ''}
+                  price={property.price}
+                  image={property.images?.[0]?.url}
+                  propertyType={property.type}
+                  beds={property.features?.bedrooms}
+                  baths={property.features?.bathrooms}
+                  available={property.available || 'now'}
+                  featured={property.is_featured}
+                  isFavorite={savedProperties.includes(property.id)}
+                  onFavoriteToggle={(id) => 
+                    onSaveToggle?.(id, !savedProperties.includes(id))
+                  }
                 />
               ))}
             </div>

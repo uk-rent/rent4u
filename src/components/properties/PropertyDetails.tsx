@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -5,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Property } from '@/types/property.types';
-import { ImageGallery } from '@/components/gallery/ImageGallery';
-import { PropertyMap } from '@/components/maps/PropertyMap';
+import ImageGallery from '@/components/gallery/ImageGallery';
+import PropertyMap from '@/components/maps/PropertyMap';
 import { BookingForm } from '@/components/bookings/BookingForm';
 
 export function PropertyDetails() {
@@ -49,7 +50,7 @@ export function PropertyDetails() {
             <CardContent className="pt-6">
               <h1 className="text-2xl font-bold mb-4">{property.title}</h1>
               <div className="flex items-center space-x-4 mb-4">
-                <Badge variant="outline">{property.property_type}</Badge>
+                <Badge variant="outline">{property.type}</Badge>
                 {property.is_featured && (
                   <Badge className="bg-primary">Featured</Badge>
                 )}
@@ -57,22 +58,22 @@ export function PropertyDetails() {
               <p className="text-gray-600 mb-4">{property.description}</p>
               
               <div className="grid grid-cols-3 gap-4 mb-4">
-                {property.bedrooms !== undefined && (
+                {property.features?.bedrooms !== undefined && (
                   <div>
                     <h3 className="font-medium">Bedrooms</h3>
-                    <p>{property.bedrooms}</p>
+                    <p>{property.features.bedrooms}</p>
                   </div>
                 )}
-                {property.bathrooms !== undefined && (
+                {property.features?.bathrooms !== undefined && (
                   <div>
                     <h3 className="font-medium">Bathrooms</h3>
-                    <p>{property.bathrooms}</p>
+                    <p>{property.features.bathrooms}</p>
                   </div>
                 )}
-                {property.area_sqm !== undefined && (
+                {property.features?.area_sqm !== undefined && (
                   <div>
                     <h3 className="font-medium">Area</h3>
-                    <p>{property.area_sqm} m²</p>
+                    <p>{property.features.area_sqm} m²</p>
                   </div>
                 )}
               </div>
@@ -88,8 +89,9 @@ export function PropertyDetails() {
                 </TabsContent>
                 <TabsContent value="location">
                   <PropertyMap
-                    latitude={property.latitude}
-                    longitude={property.longitude}
+                    latitude={property.location?.coordinates?.latitude}
+                    longitude={property.location?.coordinates?.longitude}
+                    address={property.location?.address || ''}
                   />
                 </TabsContent>
                 <TabsContent value="features">
@@ -106,11 +108,11 @@ export function PropertyDetails() {
               <div className="text-2xl font-bold mb-4">
                 ${property.price}/month
               </div>
-              <BookingForm propertyId={property.id} />
+              <BookingForm property={property} />
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
   );
-} 
+}

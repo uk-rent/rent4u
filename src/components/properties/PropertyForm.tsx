@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageUploader } from '@/components/gallery/ImageUploader';
-import { Property, CreatePropertyDto } from '@/types/property.types';
+import { Property, CreatePropertyDto, PropertyType, PropertyFeatures } from '@/types/property.types';
 import { toast } from '@/components/ui/use-toast';
 
 interface PropertyFormProps {
@@ -21,16 +22,26 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
   const [formData, setFormData] = useState<CreatePropertyDto>({
     title: property?.title || '',
     description: property?.description || '',
-    address: property?.address || '',
-    city: property?.city || '',
-    country: property?.country || '',
+    address: property?.location?.address || '',
+    city: property?.location?.city || '',
+    country: property?.location?.country || '',
     price: property?.price || 0,
     currency: property?.currency || 'USD',
-    property_type: property?.property_type || 'apartment',
-    bedrooms: property?.bedrooms || 0,
-    bathrooms: property?.bathrooms || 0,
-    area_sqm: property?.area_sqm || 0,
-    features: property?.features || {},
+    property_type: property?.type as PropertyType || 'apartment',
+    bedrooms: property?.features?.bedrooms || 0,
+    bathrooms: property?.features?.bathrooms || 0,
+    area_sqm: property?.features?.area_sqm || 0,
+    features: property?.features || {
+      bedrooms: 0,
+      bathrooms: 0,
+      area_sqm: 0,
+      furnished: false,
+      petsAllowed: false,
+      airConditioning: false,
+      heating: false,
+      parking: false,
+      elevator: false
+    },
     images: property?.images || [],
   });
 
@@ -207,4 +218,4 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
       </CardContent>
     </Card>
   );
-} 
+}

@@ -1,61 +1,29 @@
-import { User as SupabaseUser } from '@supabase/supabase-js';
 
-// Tipo de rol de usuario correspondiente al enum de la base de datos
 export type UserRole = 'tenant' | 'landlord' | 'admin';
 
-// Perfil de usuario extendido
 export interface UserProfile {
   id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  phone?: string;
-  avatar?: string;
-  bio?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Usuario con perfil para usar en la aplicación
-export interface UserWithProfile extends SupabaseUser {
-  profile?: UserProfile;
-}
-
-// Suscripción Push
-export interface PushSubscription {
-  id: string;
-  user_id: string;
-  endpoint: string;
-  p256dh: string;
-  auth: string;
-  created_at: string;
-}
-
-export interface UserSettings {
-  id: string;
-  userId: string;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  marketingEmails: boolean;
-  language: string;
-  timezone: string;
-  currency: string;
-}
-
-export interface ProfileUpdateDto {
+  email?: string;
   firstName?: string;
   lastName?: string;
-  phone?: string;
-  bio?: string;
+  role?: UserRole;
   avatar?: string;
+  phone?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface SettingsUpdateDto {
-  emailNotifications?: boolean;
-  pushNotifications?: boolean;
-  marketingEmails?: boolean;
-  language?: string;
-  timezone?: string;
-  currency?: string;
+export interface UserWithProfile {
+  id: string;
+  email?: string;
+  profile?: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    role: UserRole;
+    avatar_url?: string;
+    phone?: string;
+    created_at: string;
+    updated_at: string;
+  };
 }

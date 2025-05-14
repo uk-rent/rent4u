@@ -1,33 +1,39 @@
 
-// Mock amenities data for use in PropertyFilter component
-export const propertyAmenities = [
-  { id: '1', name: 'Wi-Fi', category: 'Technology' },
-  { id: '2', name: 'Air Conditioning', category: 'Comfort' },
-  { id: '3', name: 'Heating', category: 'Comfort' },
-  { id: '4', name: 'Washer', category: 'Appliances' },
-  { id: '5', name: 'Dryer', category: 'Appliances' },
-  { id: '6', name: 'Dishwasher', category: 'Appliances' },
-  { id: '7', name: 'Free Parking', category: 'Facilities' },
-  { id: '8', name: 'Swimming Pool', category: 'Recreation' },
-  { id: '9', name: 'Gym', category: 'Recreation' },
-  { id: '10', name: 'Elevator', category: 'Facilities' },
-  { id: '11', name: 'Wheelchair Accessible', category: 'Accessibility' },
-  { id: '12', name: 'Fire Alarm', category: 'Safety' }
-];
-
-export const getAmenities = async () => {
-  // Simulate API call
-  return new Promise(resolve => {
-    setTimeout(() => resolve(propertyAmenities), 300);
-  });
+export type Amenity = {
+  id: string;
+  name: string;
+  category: AmenityCategory;
+  icon?: string;
 };
 
-export const getAmenitiesByCategory = () => {
-  return propertyAmenities.reduce((acc, amenity) => {
-    if (!acc[amenity.category]) {
-      acc[amenity.category] = [];
-    }
-    acc[amenity.category].push(amenity);
-    return acc;
-  }, {} as Record<string, typeof propertyAmenities>);
+export type AmenityCategory = 'basic' | 'comfort' | 'security' | 'outdoor' | 'entertainment' | 'accessibility';
+
+export const AMENITIES: Amenity[] = [
+  { id: '1', name: 'Air Conditioning', category: 'comfort', icon: 'ac_unit' },
+  { id: '2', name: 'Heating', category: 'comfort', icon: 'hvac' },
+  { id: '3', name: 'Wi-Fi', category: 'entertainment', icon: 'wifi' },
+  { id: '4', name: 'TV', category: 'entertainment', icon: 'tv' },
+  { id: '5', name: 'Kitchen', category: 'basic', icon: 'kitchen' },
+  { id: '6', name: 'Washer', category: 'basic', icon: 'local_laundry_service' },
+  { id: '7', name: 'Dryer', category: 'basic', icon: 'local_laundry_service' },
+  { id: '8', name: 'Free Parking', category: 'basic', icon: 'local_parking' },
+  { id: '9', name: 'Pool', category: 'outdoor', icon: 'pool' },
+  { id: '10', name: 'Hot Tub', category: 'outdoor', icon: 'hot_tub' },
+  { id: '11', name: 'Gym', category: 'entertainment', icon: 'fitness_center' },
+  { id: '12', name: 'Elevator', category: 'accessibility', icon: 'elevator' },
+  { id: '13', name: 'Wheelchair Accessible', category: 'accessibility', icon: 'accessible' },
+  { id: '14', name: 'Security Cameras', category: 'security', icon: 'videocam' },
+  { id: '15', name: 'Fire Extinguisher', category: 'security', icon: 'fireplace' },
+  { id: '16', name: 'Smoke Alarm', category: 'security', icon: 'detector_alarm' },
+  { id: '17', name: 'Balcony', category: 'outdoor', icon: 'balcony' },
+  { id: '18', name: 'Garden', category: 'outdoor', icon: 'yard' },
+  { id: '19', name: 'BBQ Grill', category: 'outdoor', icon: 'outdoor_grill' },
+  { id: '20', name: 'Dishwasher', category: 'basic', icon: 'dishwasher' }
+];
+
+/**
+ * Fetch amenities from a mock or real data source
+ */
+export const getAmenities = async (): Promise<Amenity[]> => {
+  return Promise.resolve(AMENITIES);
 };

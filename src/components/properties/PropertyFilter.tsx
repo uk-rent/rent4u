@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Slider } from '../ui/slider';
@@ -7,7 +8,7 @@ import { Button } from '../ui/button';
 import { PropertyType, PropertyFilterOptions } from '../../types/property.types';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { getAmenities, Amenity } from '@/lib/amenities';
 
 interface PropertyFilterProps {
   onFilterChange: (filters: PropertyFilterOptions) => void;
@@ -34,25 +35,20 @@ const FEATURES = [
 
 export function PropertyFilter({ onFilterChange, initialFilters }: PropertyFilterProps) {
   const [filters, setFilters] = useState<PropertyFilterOptions>(initialFilters || {});
-  const [amenities, setAmenities] = useState<string[]>([]);
+  const [amenities, setAmenities] = useState<Amenity[]>([]);
 
   useEffect(() => {
-    // Fetch available amenities from the database
-    const fetchAmenities = async () => {
+    // Fetch available amenities
+    const loadAmenities = async () => {
       try {
-        const { data, error } = await supabase
-          .from('amenities')
-          .select('name')
-          .order('name');
-
-        if (error) throw error;
-        setAmenities(data.map((item) => item.name));
+        const amenitiesData = await getAmenities();
+        setAmenities(amenitiesData);
       } catch (error) {
         console.error('Error fetching amenities:', error);
       }
     };
 
-    fetchAmenities();
+    loadAmenities();
   }, []);
 
   const handlePropertyTypeChange = (type: PropertyType) => {
@@ -172,13 +168,13 @@ export function PropertyFilter({ onFilterChange, initialFilters }: PropertyFilte
             <Label>Amenidades</Label>
             <div className="space-y-2">
               {amenities.map((amenity) => (
-                <div key={amenity} className="flex items-center space-x-2">
+                <div key={amenity.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={amenity}
-                    checked={filters.amenities?.includes(amenity)}
-                    onCheckedChange={() => handleAmenityChange(amenity)}
+                    id={amenity.id}
+                    checked={filters.amenities?.includes(amenity.name)}
+                    onCheckedChange={() => handleAmenityChange(amenity.name)}
                   />
-                  <Label htmlFor={amenity}>{amenity}</Label>
+                  <Label htmlFor={amenity.id}>{amenity.name}</Label>
                 </div>
               ))}
             </div>

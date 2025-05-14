@@ -1,132 +1,228 @@
 
-import { 
-  Payment, 
-  PaymentMethod, 
-  PaymentStatus,
-  CreatePaymentDto,
-  RefundPaymentDto
-} from '@/types/payment.types';
 import { v4 as uuidv4 } from 'uuid';
+import { Payment, PaymentMethod, PaymentStatus, CreatePaymentDto, RefundPaymentDto } from '@/types/payment.types';
+import { toast } from '@/components/ui/use-toast';
 
-// In-memory storage for payments (would be Supabase in production)
-const mockPayments: Payment[] = [
+// Mock data for payments
+const MOCK_PAYMENTS: Payment[] = [
   {
     id: '1',
     bookingId: 'booking-1',
-    amount: 500,
+    transactionId: 'txn_' + uuidv4().substring(0, 8),
+    userId: 'user-1',
+    amount: 1200,
     currency: 'USD',
-    status: 'completed',
     method: 'credit_card',
-    transactionId: 'txn_123456',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    paymentDetails: {
-      cardLast4: '4242',
-      cardBrand: 'Visa',
-    },
+    status: 'completed',
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
+    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
   {
     id: '2',
     bookingId: 'booking-2',
-    amount: 750,
+    transactionId: 'txn_' + uuidv4().substring(0, 8),
+    userId: 'user-1',
+    amount: 950,
     currency: 'USD',
+    method: 'paypal',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
+    updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: '3',
+    bookingId: 'booking-3',
+    transactionId: 'txn_' + uuidv4().substring(0, 8),
+    userId: 'user-2',
+    amount: 1500,
+    currency: 'USD',
+    method: 'credit_card',
     status: 'pending',
-    method: 'bank_transfer',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    paymentDetails: {
-      bankName: 'Example Bank',
-      accountNumber: '****7890',
-    },
-  }
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 ];
+
+/**
+ * Get all payments, optionally filtered by user ID
+ */
+export const getPayments = async (userId?: string): Promise<Payment[]> => {
+  // Mock API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const filteredPayments = userId
+        ? MOCK_PAYMENTS.filter(payment => payment.userId === userId)
+        : MOCK_PAYMENTS;
+      
+      resolve([...filteredPayments]);
+    }, 500);
+  });
+};
+
+/**
+ * Get a payment by ID
+ */
+export const getPaymentById = async (id: string): Promise<Payment> => {
+  // Mock API call
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const payment = MOCK_PAYMENTS.find(p => p.id === id);
+      
+      if (payment) {
+        resolve({ ...payment });
+      } else {
+        reject(new Error('Payment not found'));
+      }
+    }, 300);
+  });
+};
 
 /**
  * Create a new payment
  */
-export const createPayment = async (data: CreatePaymentDto): Promise<Payment> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const newPayment: Payment = {
-    id: uuidv4(),
-    bookingId: data.bookingId,
-    amount: data.amount,
-    currency: data.currency,
-    status: 'completed', // For demo, assume payment is successful
-    method: data.method,
-    transactionId: `txn_${Math.random().toString(36).substring(2, 10)}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    paymentDetails: {
-      cardLast4: data.paymentDetails.cardNumber?.slice(-4),
-      cardBrand: getCardBrand(data.paymentDetails.cardNumber || ''),
-    }
-  };
-  
-  // Add to mock database
-  mockPayments.push(newPayment);
-  
-  return newPayment;
+export const createPayment = async (paymentData: CreatePaymentDto): Promise<Payment> => {
+  // Mock API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newPayment: Payment = {
+        id: uuidv4(),
+        bookingId: paymentData.bookingId,
+        transactionId: 'txn_' + uuidv4().substring(0, 8),
+        userId: paymentData.userId,
+        amount: paymentData.amount,
+        currency: paymentData.currency || 'USD',
+        method: paymentData.method,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // In a real implementation, we'd save this to the database
+      MOCK_PAYMENTS.push(newPayment);
+      
+      resolve({ ...newPayment });
+    }, 800);
+  });
 };
 
 /**
- * Get payment history for a user
+ * Process a payment (change status from pending to completed)
  */
-export const getUserPaymentHistory = async (userId: string): Promise<Payment[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // In a real implementation, we would filter by user ID
-  return [...mockPayments];
-};
-
-/**
- * Get a single payment by ID
- */
-export const getPaymentById = async (paymentId: string): Promise<Payment | null> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const payment = mockPayments.find(p => p.id === paymentId);
-  return payment || null;
+export const processPayment = async (id: string): Promise<Payment> => {
+  // Mock API call
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const paymentIndex = MOCK_PAYMENTS.findIndex(p => p.id === id);
+      
+      if (paymentIndex === -1) {
+        reject(new Error('Payment not found'));
+        return;
+      }
+      
+      const payment = MOCK_PAYMENTS[paymentIndex];
+      
+      if (payment.status !== 'pending') {
+        reject(new Error('Payment cannot be processed - invalid status'));
+        return;
+      }
+      
+      const updatedPayment = {
+        ...payment,
+        status: 'completed' as PaymentStatus,
+        updatedAt: new Date().toISOString()
+      };
+      
+      MOCK_PAYMENTS[paymentIndex] = updatedPayment;
+      
+      resolve({ ...updatedPayment });
+    }, 800);
+  });
 };
 
 /**
  * Refund a payment
  */
-export const refundPayment = async (data: RefundPaymentDto): Promise<Payment> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  const paymentIndex = mockPayments.findIndex(p => p.id === data.paymentId);
-  if (paymentIndex === -1) {
-    throw new Error('Payment not found');
-  }
-  
-  if (mockPayments[paymentIndex].status !== 'completed') {
-    throw new Error('Only completed payments can be refunded');
-  }
-  
-  // Update payment
-  const updatedPayment = {
-    ...mockPayments[paymentIndex],
-    status: 'refunded' as PaymentStatus,
-    refundAmount: data.amount,
-    refundReason: data.reason,
-    updatedAt: new Date().toISOString()
-  };
-  
-  mockPayments[paymentIndex] = updatedPayment;
-  
-  return updatedPayment;
+export const refundPayment = async (refundData: RefundPaymentDto): Promise<Payment> => {
+  // Mock API call
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const paymentIndex = MOCK_PAYMENTS.findIndex(p => p.id === refundData.paymentId);
+      
+      if (paymentIndex === -1) {
+        reject(new Error('Payment not found'));
+        return;
+      }
+      
+      const payment = MOCK_PAYMENTS[paymentIndex];
+      
+      if (payment.status !== 'completed') {
+        reject(new Error('Only completed payments can be refunded'));
+        return;
+      }
+      
+      if (refundData.amount > payment.amount) {
+        reject(new Error('Refund amount cannot exceed original payment amount'));
+        return;
+      }
+      
+      const updatedPayment = {
+        ...payment,
+        status: refundData.amount === payment.amount ? 'refunded' : 'partially_refunded' as PaymentStatus,
+        updatedAt: new Date().toISOString()
+      };
+      
+      MOCK_PAYMENTS[paymentIndex] = updatedPayment;
+      
+      // Create a new refund transaction
+      const refundTransaction: Payment = {
+        id: uuidv4(),
+        bookingId: payment.bookingId,
+        transactionId: 'ref_' + uuidv4().substring(0, 8),
+        userId: payment.userId,
+        amount: -refundData.amount,  // Negative amount for refunds
+        currency: payment.currency,
+        method: payment.method,
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        refundedPaymentId: payment.id,
+        refundReason: refundData.reason
+      };
+      
+      MOCK_PAYMENTS.push(refundTransaction);
+      
+      resolve({ ...updatedPayment });
+    }, 800);
+  });
 };
 
-// Helper function to determine card brand from card number
-function getCardBrand(cardNumber: string): string {
-  if (cardNumber.startsWith('4')) return 'Visa';
-  if (cardNumber.startsWith('5')) return 'Mastercard';
-  if (cardNumber.startsWith('3')) return 'Amex';
-  if (cardNumber.startsWith('6')) return 'Discover';
-  return 'Unknown';
-}
+/**
+ * Get payment statistics
+ */
+export const getPaymentStats = async (userId?: string): Promise<{
+  totalRevenue: number;
+  completedPayments: number;
+  pendingPayments: number;
+  refundedAmount: number;
+}> => {
+  const payments = await getPayments(userId);
+  
+  const stats = payments.reduce((acc, payment) => {
+    if (payment.status === 'completed' || payment.status === 'partially_refunded') {
+      acc.completedPayments++;
+      acc.totalRevenue += payment.amount;
+    } else if (payment.status === 'pending') {
+      acc.pendingPayments++;
+    } else if (payment.status === 'refunded' || payment.amount < 0) {
+      acc.refundedAmount += Math.abs(payment.amount);
+    }
+    return acc;
+  }, {
+    totalRevenue: 0,
+    completedPayments: 0,
+    pendingPayments: 0,
+    refundedAmount: 0
+  });
+  
+  return stats;
+};
