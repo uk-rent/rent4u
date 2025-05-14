@@ -9,7 +9,7 @@ export interface UserProfile {
   role?: UserRole;
   avatar?: string;
   phone?: string;
-  bio?: string; // Added bio field
+  bio?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -29,7 +29,6 @@ export interface UserWithProfile {
   };
 }
 
-// Add missing types
 export interface ProfileUpdateDto {
   firstName?: string;
   lastName?: string;
@@ -44,18 +43,21 @@ export interface UserSettings {
   userId: string;
   emailNotifications: boolean;
   pushNotifications: boolean;
+  marketingEmails: boolean;  // Added property
   theme: 'light' | 'dark' | 'system';
   language: string;
+  timezone: string;  // Added property
+  currency: string;  // Added property
   createdAt: string;
   updatedAt: string;
 }
 
 export interface PushSubscription {
   id: string;
-  userId: string;
+  userId: string;  // Changed from user_id to match the type
   endpoint: string;
   p256dh: string;
   auth: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string;  // Changed from created_at to match the type
+  updatedAt: string;  // Changed from updated_at to match the type
 }

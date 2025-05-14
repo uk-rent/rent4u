@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format, parseISO } from "date-fns"
@@ -17,3 +16,11 @@ export function formatDate(date: string | Date, formatString: string = 'PPP'): s
     return 'Invalid date';
   }
 }
+
+// Format currency - used by PropertyStats
+export const formatCurrency = (value: number, currency = 'GBP') => {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency,
+  }).format(value);
+};

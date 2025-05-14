@@ -7,11 +7,18 @@ export interface Review {
   comment: string;
   createdAt: string;
   updatedAt: string;
+  response?: string;  // Added response field
   user?: {
     id: string;
     name: string;
     avatar?: string;
   };
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: { [key: number]: number };
 }
 
 export interface CreateReviewDto {

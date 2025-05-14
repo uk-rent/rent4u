@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
     onSearch({
       query,
       location: location || undefined,
+      // Fix the type issue by providing location as an object
+      locationFilter: location ? { city: location } : undefined,
       page: 1
     });
   };
@@ -48,4 +51,4 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
       </Button>
     </form>
   );
-} 
+}

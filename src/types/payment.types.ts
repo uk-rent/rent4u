@@ -15,10 +15,13 @@ export interface PaymentDetails {
 export interface Payment {
   id: string;
   userId: string;
+  bookingId?: string;  // Added bookingId
   amount: number;
   currency: string;
   status: PaymentStatus;
   paymentMethod: PaymentMethod;
+  method?: string;     // Added method (legacy field)
+  transactionId?: string;  // Added transactionId
   paymentDetails?: PaymentDetails;
   createdAt: string;
   updatedAt: string;
@@ -27,13 +30,21 @@ export interface Payment {
 
 export interface CreatePaymentDto {
   userId: string;
+  bookingId?: string;  // Added bookingId
   amount: number;
   currency?: string;
   paymentMethod: PaymentMethod;
+  paymentDetails?: any; // Added paymentDetails
   description?: string;
 }
 
 export interface UpdatePaymentDto {
   status?: PaymentStatus;
   description?: string;
+}
+
+export interface RefundPaymentDto {
+  paymentId: string;
+  amount: number;
+  reason: string;
 }

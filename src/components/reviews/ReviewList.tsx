@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Review, ReviewStats } from '@/types/review.types';
@@ -48,7 +49,25 @@ export function ReviewList({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setReviews(data || []);
+      
+      // Convert from database format to Review format
+      const formattedReviews: Review[] = (data || []).map(review => ({
+        id: review.id,
+        propertyId: review.property_id,
+        userId: review.user_id,
+        rating: review.rating,
+        comment: review.comment,
+        response: review.response,
+        createdAt: review.created_at,
+        updatedAt: review.updated_at,
+        user: review.user ? {
+          id: review.user.id,
+          name: `${review.user.first_name || ''} ${review.user.last_name || ''}`.trim(),
+          avatar: review.user.avatar
+        } : undefined
+      }));
+      
+      setReviews(formattedReviews);
     } catch (error) {
       toast({
         title: 'Error',
@@ -181,23 +200,22 @@ export function ReviewList({
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={review.user?.avatar}
-                      alt={`${review.user?.first_name} ${review.user?.last_name}`}
+                      alt={review.user?.name || "User"}
                     />
                     <AvatarFallback>
-                      {review.user?.first_name?.[0]}
-                      {review.user?.last_name?.[0]}
+                      {review.user?.name?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">
-                          {review.user?.first_name} {review.user?.last_name}
+                          {review.user?.name || "Anonymous User"}
                         </h4>
                         <div className="flex items-center space-x-2">
                           {renderStars(review.rating)}
                           <span className="text-sm text-muted-foreground">
-                            {format(new Date(review.created_at), 'PPP')}
+                            {format(new Date(review.createdAt), 'PPP')}
                           </span>
                         </div>
                       </div>
@@ -229,4 +247,4 @@ export function ReviewList({
       </div>
     </div>
   );
-} 
+}
