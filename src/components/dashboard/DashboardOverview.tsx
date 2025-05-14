@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RevenueChart } from './RevenueChart';
 import { BookingStats } from './BookingStats';
 import { PropertyStats } from './PropertyStats';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   DollarSign,
@@ -184,4 +184,4 @@ export function DashboardOverview() {
       </div>
     </div>
   );
-} 
+}

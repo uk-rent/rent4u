@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   BarChart,
@@ -148,4 +148,4 @@ export function BookingStats({ timeRange }: BookingStatsProps) {
       </ResponsiveContainer>
     </div>
   );
-} 
+}

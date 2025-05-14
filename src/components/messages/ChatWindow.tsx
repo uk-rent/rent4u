@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { SendIcon, Loader2 } from 'lucide-react';
 
@@ -206,4 +206,4 @@ export function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       </CardContent>
     </Card>
   );
-} 
+}

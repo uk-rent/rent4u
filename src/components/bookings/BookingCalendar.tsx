@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Booking } from '@/types/booking.types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { format, isWithinInterval } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
 
@@ -92,4 +92,4 @@ export function BookingCalendar({
       </CardContent>
     </Card>
   );
-} 
+}

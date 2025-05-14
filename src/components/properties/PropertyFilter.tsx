@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { PropertyType, PropertyFilterOptions } from '../../types/property.types';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyFilterProps {
   onFilterChange: (filters: PropertyFilterOptions) => void;
@@ -219,4 +219,4 @@ export function PropertyFilter({ onFilterChange, initialFilters }: PropertyFilte
       </CardContent>
     </Card>
   );
-} 
+}

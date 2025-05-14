@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { format, addDays, differenceInDays } from 'date-fns';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 interface BookingFormProps {
@@ -192,4 +192,4 @@ export function BookingForm({ property, onSuccess }: BookingFormProps) {
       </CardContent>
     </Card>
   );
-} 
+}
