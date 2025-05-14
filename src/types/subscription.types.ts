@@ -31,6 +31,7 @@ export interface SubscriptionFeatures {
 export interface SubscriptionPlan {
   id: string;
   name: string;
+  description?: string; // Added description field
   price: number;
   interval: SubscriptionInterval;
   stripe_price_id: string | null;
@@ -41,6 +42,10 @@ export interface SubscriptionPlan {
   listing_duration: number;      // Duración en días
   created_at: string;
   updated_at: string;
+  currency?: string; // Added for mapper
+  active?: boolean; // Added for mapper
+  trial_period_days?: number; // Added for mapper
+  metadata?: any; // Added for mapper
 }
 
 // Suscripción de un usuario
@@ -58,6 +63,22 @@ export interface Subscription {
   canceled_at: string | null;
   trial_start: string | null;
   trial_end: string | null;
+  created_at: string;
+  updated_at: string;
+  metadata?: any; // Added for mapper
+}
+
+// Added missing SubscriptionPayment type
+export interface SubscriptionPayment {
+  id: string;
+  user_id: string;
+  subscription_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  payment_method: string;
+  transaction_id?: string;
+  invoice_id?: string;
   created_at: string;
   updated_at: string;
 }

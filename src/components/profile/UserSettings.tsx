@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,4 +178,4 @@ export function UserSettings() {
       </CardContent>
     </Card>
   );
-} 
+}

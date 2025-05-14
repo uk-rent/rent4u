@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,14 @@ export function UserProfile() {
         // Aquí iría la llamada a la API para obtener el perfil
         // const response = await api.getUserProfile(user.id);
         // setProfile(response.data);
+        
+        // For now, use mock data based on the user object
+        if (user) {
+          setProfile({
+            ...user,
+            avatar: user.avatarUrl // Make sure avatar is available for backward compatibility
+          } as UserProfileType);
+        }
       } catch (error) {
         console.error('Error fetching profile:', error);
       } finally {
@@ -46,9 +55,9 @@ export function UserProfile() {
       <CardContent>
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={profile.avatar} />
+            <AvatarImage src={profile.avatarUrl || profile.avatar} />
             <AvatarFallback>
-              {profile.firstName[0]}{profile.lastName[0]}
+              {profile.firstName?.[0]}{profile.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -91,4 +100,4 @@ export function UserProfile() {
       </CardContent>
     </Card>
   );
-} 
+}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -133,7 +134,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     
     try {
       // Obtener IDs de todas las notificaciones no leídas
-      const result = await getUserNotifications(user.id, { limit: 100 }, ['sent', 'delivered']);
+      const result = await getUserNotifications(user.id, { page: 1, limit: 100 }, ['sent', 'delivered']);
       const unreadIds = result.data.map(n => n.id);
       
       if (unreadIds.length === 0) return true;

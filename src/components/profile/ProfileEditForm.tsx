@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +16,9 @@ export function ProfileEditForm() {
   const [formData, setFormData] = useState<ProfileUpdateDto>({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
-    phone: '',
-    bio: '',
-    avatar: user?.avatar || '',
+    phone: user?.phone || '',
+    bio: user?.bio || '',
+    avatarUrl: user?.avatarUrl || user?.avatar || '',
   });
 
   const handleChange = (
@@ -75,9 +76,9 @@ export function ProfileEditForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={formData.avatar} />
+              <AvatarImage src={formData.avatarUrl} />
               <AvatarFallback>
-                {formData.firstName[0]}{formData.lastName[0]}
+                {formData.firstName?.[0]}{formData.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -144,4 +145,4 @@ export function ProfileEditForm() {
       </CardContent>
     </Card>
   );
-} 
+}

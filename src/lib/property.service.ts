@@ -62,3 +62,35 @@ export const getProperties = async (params: any = {}) => {
     throw error;
   }
 };
+
+// Add missing getSavedProperties function
+export const getSavedProperties = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('saved_properties')
+      .select('property_id')
+      .eq('user_id', userId);
+      
+    if (error) throw error;
+    
+    // Extract just the property IDs
+    const savedIds = data.map(item => item.property_id);
+    
+    // Get the full property details for each saved property
+    if (savedIds.length > 0) {
+      const { data: properties, error: propertiesError } = await supabase
+        .from('properties')
+        .select('*')
+        .in('id', savedIds);
+        
+      if (propertiesError) throw propertiesError;
+      
+      return { data: properties || [], savedIds };
+    }
+    
+    return { data: [], savedIds: [] };
+  } catch (error) {
+    console.error('Error fetching saved properties:', error);
+    throw error;
+  }
+};

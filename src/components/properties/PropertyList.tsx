@@ -20,6 +20,7 @@ interface PropertyListProps {
   onSaveToggle?: (propertyId: string, saved: boolean) => void;
   loading?: boolean;
   onFilterChange?: (filter: PropertyFilterOptions) => void;
+  properties?: Property[]; // Added properties prop
 }
 
 export function PropertyList({
@@ -30,20 +31,30 @@ export function PropertyList({
   onSaveToggle,
   loading: externalLoading,
   onFilterChange,
+  properties: externalProperties, // Use external properties if provided
 }: PropertyListProps) {
   const navigate = useNavigate();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [properties, setProperties] = useState<Property[]>(externalProperties || []);
+  const [loading, setLoading] = useState(!externalProperties);
   const [filter, setFilter] = useState<PropertyFilterOptions>(initialFilter || {});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
+    // If external properties are provided, use them
+    if (externalProperties) {
+      setProperties(externalProperties);
+      return;
+    }
+    
     fetchProperties();
-  }, [filter, debouncedSearchQuery]);
+  }, [filter, debouncedSearchQuery, externalProperties]);
 
   const fetchProperties = async () => {
+    // Skip fetching if external properties are provided
+    if (externalProperties) return;
+    
     try {
       setLoading(true);
 

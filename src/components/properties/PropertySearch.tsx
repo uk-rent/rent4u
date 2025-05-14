@@ -17,8 +17,8 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create a proper location filter object
-    const locationFilter = location ? { city: location } : undefined;
+    // Create a proper location filter object with city property
+    const locationFilter = location ? { city: location, state: undefined, country: undefined } : undefined;
     
     onSearch({
       query,
