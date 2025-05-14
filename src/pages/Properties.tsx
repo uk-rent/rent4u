@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -7,7 +8,7 @@ import { PropertyFilter } from "../components/properties/PropertyFilter";
 import { PropertyStats } from "../components/properties/PropertyStats";
 import { usePropertyContext } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../integrations/supabase/client";
 import { toast } from "../components/ui/use-toast";
 import { PropertyFilterOptions } from "../types/property.types";
 import { Button } from "../components/ui/button";
