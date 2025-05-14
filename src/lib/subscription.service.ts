@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   SubscriptionPlan, 
@@ -7,48 +6,108 @@ import {
   SubscriptionInterval 
 } from '@/types/subscription.types';
 import { ApiError } from '@/types/api.types';
+import { 
+  mapDbPlanToSubscriptionPlan, 
+  mapDbSubscriptionToSubscription 
+} from '@/utils/subscription.mapper';
 
 /**
  * Obtiene todos los planes de suscripción disponibles
  */
 export const getSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .order('price', { ascending: true });
-
-  if (error) {
-    throw new ApiError(
-      'Error al obtener planes de suscripción', 
-      'SUBSCRIPTION_PLANS_ERROR', 
-      500, 
-      error
-    );
+  // Since we don't have a subscription_plans table yet, let's use a Supabase RPC call
+  // or we'll need to create this table in a future migration
+  try {
+    const { data, error } = await supabase.rpc('get_subscription_plans');
+    
+    if (error) {
+      throw new ApiError(
+        'Error al obtener planes de suscripción', 
+        'SUBSCRIPTION_PLANS_ERROR', 
+        500, 
+        error
+      );
+    }
+    
+    return (data || []).map(mapDbPlanToSubscriptionPlan);
+  } catch (error) {
+    // Fallback to mock data if the RPC doesn't exist yet
+    console.warn('Using mock subscription plans - please set up the subscription_plans table');
+    return [
+      {
+        id: 'free',
+        name: 'Plan Gratuito',
+        description: 'Para empezar a publicar propiedades',
+        price: 0,
+        currency: 'USD',
+        interval: 'month',
+        max_listings: 3,
+        max_featured_listings: 0,
+        features: ['Hasta 3 propiedades', 'Soporte básico', 'Duración: 30 días'],
+        listing_duration: 30,
+        active: true,
+        trial_period_days: 0,
+        metadata: {}
+      },
+      {
+        id: 'basic',
+        name: 'Plan Básico',
+        description: 'Para propietarios independientes',
+        price: 19.99,
+        currency: 'USD',
+        interval: 'month',
+        max_listings: 10,
+        max_featured_listings: 2,
+        features: ['Hasta 10 propiedades', '2 anuncios destacados', 'Soporte prioritario', 'Duración: 60 días'],
+        listing_duration: 60,
+        active: true,
+        trial_period_days: 7,
+        metadata: {}
+      },
+      {
+        id: 'pro',
+        name: 'Plan Profesional',
+        description: 'Para agencias y profesionales',
+        price: 49.99,
+        currency: 'USD',
+        interval: 'month',
+        max_listings: 50,
+        max_featured_listings: 10,
+        features: ['Hasta 50 propiedades', '10 anuncios destacados', 'Soporte premium', 'Estadísticas avanzadas', 'Duración: 90 días'],
+        listing_duration: 90,
+        active: true,
+        trial_period_days: 14,
+        metadata: {}
+      }
+    ];
   }
-
-  return data as SubscriptionPlan[];
 };
 
 /**
  * Obtiene un plan de suscripción por su ID
  */
 export const getSubscriptionPlanById = async (planId: string): Promise<SubscriptionPlan> => {
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('id', planId)
-    .single();
-
-  if (error) {
+  try {
+    const plans = await getSubscriptionPlans();
+    const plan = plans.find(p => p.id === planId);
+    
+    if (!plan) {
+      throw new ApiError(
+        'Plan de suscripción no encontrado', 
+        'SUBSCRIPTION_PLAN_NOT_FOUND', 
+        404
+      );
+    }
+    
+    return plan;
+  } catch (error) {
     throw new ApiError(
-      'Plan de suscripción no encontrado', 
-      'SUBSCRIPTION_PLAN_NOT_FOUND', 
-      404, 
-      error
+      'Error al obtener plan de suscripción', 
+      'SUBSCRIPTION_PLAN_ERROR', 
+      500, 
+      error as Error
     );
   }
-
-  return data as SubscriptionPlan;
 };
 
 /**

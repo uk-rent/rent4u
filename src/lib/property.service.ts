@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Property, 
@@ -10,6 +9,7 @@ import {
 import { ApiError, PaginationParams } from '@/types/api.types';
 import { checkSubscriptionLimits, getActiveSubscription } from './subscription.service';
 import { SubscriptionPlan } from '@/types/subscription.types';
+import { mapDbPropertyToProperty, mapPropertyToDbProperty } from '@/utils/property.mapper';
 
 /**
  * Obtener propiedades con paginación y filtros
@@ -100,11 +100,13 @@ export const getProperties = async (
     );
   }
 
+  const mappedProperties: Property[] = (data || []).map(mapDbPropertyToProperty);
+
   const total = count || 0;
   const pages = Math.ceil(total / limit);
 
   return {
-    data: data as Property[],
+    data: mappedProperties,
     total,
     page,
     limit,
@@ -131,7 +133,7 @@ export const getPropertyById = async (id: string): Promise<Property> => {
     );
   }
 
-  return data as Property;
+  return mapDbPropertyToProperty(data);
 };
 
 /**
@@ -192,9 +194,14 @@ export const createProperty = async (
   const expirationDate = new Date();
   expirationDate.setDate(expirationDate.getDate() + plan.listing_duration);
   
-  // Preparar datos para inserción
-  const newPropertyData = {
+  // Preparar datos para inserción usando el mapper
+  const dbPropertyData = mapPropertyToDbProperty({
     ...propertyData,
+    ownerId: userId
+  });
+  
+  const newPropertyData = {
+    ...dbPropertyData,
     user_id: userId,
     status: propertyData.status || 'draft',
     listing_expires_at: expirationDate.toISOString(),
@@ -216,7 +223,7 @@ export const createProperty = async (
     );
   }
 
-  return data as Property;
+  return mapDbPropertyToProperty(data);
 };
 
 /**
@@ -273,7 +280,7 @@ export const updateProperty = async (
     );
   }
 
-  return data as Property;
+  return mapDbPropertyToProperty(data);
 };
 
 /**
@@ -357,7 +364,7 @@ export const renewProperty = async (id: string, userId: string): Promise<Propert
     );
   }
 
-  return data as Property;
+  return mapDbPropertyToProperty(data);
 };
 
 /**
@@ -469,11 +476,13 @@ export const getSavedProperties = async (
     );
   }
 
+  const mappedProperties = (properties || []).map(mapDbPropertyToProperty);
+  
   const total = count || 0;
   const pages = Math.ceil(total / limit);
 
   return {
-    data: properties as Property[],
+    data: mappedProperties,
     total,
     page,
     limit,
