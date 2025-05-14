@@ -1,195 +1,132 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { 
-  SubscriptionPayment, 
+  Payment, 
   PaymentMethod, 
   PaymentStatus,
-  InitiatePaymentDto,
-  PaymentInitiationResponse,
-  PaymentWebhookData
+  CreatePaymentDto,
+  RefundPaymentDto
 } from '@/types/payment.types';
-import { ApiError } from '@/types/api.types';
-import { updateSubscriptionStatus } from './subscription.service';
+import { v4 as uuidv4 } from 'uuid';
+
+// In-memory storage for payments (would be Supabase in production)
+const mockPayments: Payment[] = [
+  {
+    id: '1',
+    bookingId: 'booking-1',
+    amount: 500,
+    currency: 'USD',
+    status: 'completed',
+    method: 'credit_card',
+    transactionId: 'txn_123456',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    paymentDetails: {
+      cardLast4: '4242',
+      cardBrand: 'Visa',
+    },
+  },
+  {
+    id: '2',
+    bookingId: 'booking-2',
+    amount: 750,
+    currency: 'USD',
+    status: 'pending',
+    method: 'bank_transfer',
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000).toISOString(),
+    paymentDetails: {
+      bankName: 'Example Bank',
+      accountNumber: '****7890',
+    },
+  }
+];
 
 /**
- * Iniciar un proceso de pago
- * 
- * Este es un método base que será extendido con la integración real de Stripe/PayPal
+ * Create a new payment
  */
-export const initiatePayment = async (
-  userId: string,
-  paymentData: InitiatePaymentDto
-): Promise<PaymentInitiationResponse> => {
-  try {
-    // Esta es una implementación simplificada
-    // En una implementación real, aquí integraríamos con Stripe o PayPal
-    
-    // Registrar el pago pendiente en la base de datos
-    const { data: payment, error } = await supabase
-      .from('subscription_payments')
-      .insert({
-        user_id: userId,
-        amount: paymentData.amount || 0,
-        currency: paymentData.currency || 'USD',
-        status: 'pending',
-        payment_method: paymentData.payment_method
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error registering payment:', error);
-      throw new Error(`Error al registrar el pago: ${error.message}`);
+export const createPayment = async (data: CreatePaymentDto): Promise<Payment> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  const newPayment: Payment = {
+    id: uuidv4(),
+    bookingId: data.bookingId,
+    amount: data.amount,
+    currency: data.currency,
+    status: 'completed', // For demo, assume payment is successful
+    method: data.method,
+    transactionId: `txn_${Math.random().toString(36).substring(2, 10)}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    paymentDetails: {
+      cardLast4: data.paymentDetails.cardNumber?.slice(-4),
+      cardBrand: getCardBrand(data.paymentDetails.cardNumber || ''),
     }
-
-    // En una implementación real, aquí obtendríamos la URL de checkout de Stripe/PayPal
-    return {
-      success: true,
-      payment_id: payment.id,
-      checkout_url: 'https://example.com/checkout/dummy',
-      status: 'pending'
-    };
-  } catch (error: any) {
-    console.error('Error initiating payment:', error);
-    return {
-      success: false,
-      message: `Error al iniciar el pago: ${error.message}`
-    };
-  }
+  };
+  
+  // Add to mock database
+  mockPayments.push(newPayment);
+  
+  return newPayment;
 };
 
 /**
- * Registrar un pago en la base de datos
+ * Get payment history for a user
  */
-export const recordPayment = async (
-  paymentData: {
-    subscription_id?: string;
-    user_id: string;
-    amount: number;
-    currency?: string;
-    status: PaymentStatus;
-    payment_method: PaymentMethod;
-    transaction_id?: string;
-    invoice_id?: string;
-  }
-): Promise<SubscriptionPayment> => {
-  const { data, error } = await supabase
-    .from('subscription_payments')
-    .insert({
-      ...paymentData,
-      currency: paymentData.currency || 'USD'
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error recording payment:', error);
-    throw new ApiError(
-      'Error al registrar el pago en la base de datos',
-      'RECORD_PAYMENT_ERROR',
-      500,
-      error
-    );
-  }
-
-  return data as SubscriptionPayment;
+export const getUserPaymentHistory = async (userId: string): Promise<Payment[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // In a real implementation, we would filter by user ID
+  return [...mockPayments];
 };
 
 /**
- * Actualizar el estado de un pago existente
+ * Get a single payment by ID
  */
-export const updatePaymentStatus = async (
-  paymentId: string,
-  status: PaymentStatus,
-  transactionId?: string,
-  invoiceId?: string
-): Promise<SubscriptionPayment> => {
-  const updateData: any = { status };
+export const getPaymentById = async (paymentId: string): Promise<Payment | null> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
   
-  if (transactionId) {
-    updateData.transaction_id = transactionId;
-  }
-  
-  if (invoiceId) {
-    updateData.invoice_id = invoiceId;
-  }
-  
-  const { data, error } = await supabase
-    .from('subscription_payments')
-    .update(updateData)
-    .eq('id', paymentId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating payment status:', error);
-    throw new ApiError(
-      'Error al actualizar el estado del pago',
-      'UPDATE_PAYMENT_ERROR',
-      500,
-      error
-    );
-  }
-
-  return data as SubscriptionPayment;
+  const payment = mockPayments.find(p => p.id === paymentId);
+  return payment || null;
 };
 
 /**
- * Obtener el historial de pagos de un usuario
+ * Refund a payment
  */
-export const getUserPaymentHistory = async (userId: string): Promise<SubscriptionPayment[]> => {
-  const { data, error } = await supabase
-    .from('subscription_payments')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching payment history:', error);
-    throw new ApiError(
-      'Error al obtener el historial de pagos',
-      'PAYMENT_HISTORY_ERROR',
-      500,
-      error
-    );
-  }
-
-  return data as SubscriptionPayment[];
-};
-
-/**
- * Procesar un webhook de pago (Stripe/PayPal)
- * 
- * Esta es una función base que será implementada específicamente para cada proveedor de pagos
- */
-export const processPaymentWebhook = async (data: PaymentWebhookData): Promise<void> => {
-  // Implementación básica, para ser extendida con lógica específica de Stripe/PayPal
+export const refundPayment = async (data: RefundPaymentDto): Promise<Payment> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Verificar si es un evento de pago exitoso
-  if (data.event_type.includes('payment.succeeded') && data.subscription_id) {
-    // Actualizar el estado de la suscripción
-    await updateSubscriptionStatus(data.subscription_id, 'active');
-    
-    // Registrar el pago exitoso si tenemos los detalles
-    if (data.payment_id && data.amount && data.customer_id) {
-      await updatePaymentStatus(
-        data.payment_id,
-        'succeeded'
-      );
-    }
+  const paymentIndex = mockPayments.findIndex(p => p.id === data.paymentId);
+  if (paymentIndex === -1) {
+    throw new Error('Payment not found');
   }
   
-  // Verificar si es un evento de pago fallido
-  if (data.event_type.includes('payment.failed') && data.subscription_id) {
-    // Actualizar el estado de la suscripción
-    await updateSubscriptionStatus(data.subscription_id, 'past_due');
-    
-    // Actualizar el estado del pago
-    if (data.payment_id) {
-      await updatePaymentStatus(
-        data.payment_id,
-        'failed'
-      );
-    }
+  if (mockPayments[paymentIndex].status !== 'completed') {
+    throw new Error('Only completed payments can be refunded');
   }
+  
+  // Update payment
+  const updatedPayment = {
+    ...mockPayments[paymentIndex],
+    status: 'refunded' as PaymentStatus,
+    refundAmount: data.amount,
+    refundReason: data.reason,
+    updatedAt: new Date().toISOString()
+  };
+  
+  mockPayments[paymentIndex] = updatedPayment;
+  
+  return updatedPayment;
 };
+
+// Helper function to determine card brand from card number
+function getCardBrand(cardNumber: string): string {
+  if (cardNumber.startsWith('4')) return 'Visa';
+  if (cardNumber.startsWith('5')) return 'Mastercard';
+  if (cardNumber.startsWith('3')) return 'Amex';
+  if (cardNumber.startsWith('6')) return 'Discover';
+  return 'Unknown';
+}

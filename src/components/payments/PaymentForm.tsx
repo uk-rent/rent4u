@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,22 +7,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   CreditCard,
   Banknote,
-  Paypal,
+  CreditCardIcon,
   Loader2,
 } from 'lucide-react';
+import { createPayment } from '@/lib/payment.service';
 
 interface PaymentFormProps {
   bookingId: string;
   amount: number;
   currency: string;
   onSuccess?: (payment: Payment) => void;
+}
+
+interface CardDetails {
+  number: string;
+  expiry: string;
+  cvc: string;
+  name: string;
 }
 
 export function PaymentForm({
@@ -34,7 +41,7 @@ export function PaymentForm({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
-  const [cardDetails, setCardDetails] = useState({
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
     number: '',
     expiry: '',
     cvc: '',
@@ -55,67 +62,27 @@ export function PaymentForm({
 
     setLoading(true);
     try {
-      // Create payment intent
-      const { data: paymentIntent, error: intentError } = await supabase
-        .functions.invoke('create-payment-intent', {
-          body: {
-            amount,
-            currency,
-            payment_method: paymentMethod,
-          },
-        });
-
-      if (intentError) throw intentError;
-
-      // Create payment record
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .insert([
-          {
-            booking_id: bookingId,
-            amount,
-            currency,
-            status: 'pending',
-            method: paymentMethod,
-            transaction_id: paymentIntent.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (paymentError) throw paymentError;
-
-      // Process payment based on method
-      switch (paymentMethod) {
-        case 'credit_card':
-          // Integrate with Stripe or other payment processor
-          await processCreditCardPayment(paymentIntent.clientSecret, cardDetails);
-          break;
-        case 'bank_transfer':
-          // Handle bank transfer
-          await processBankTransfer(paymentIntent.id);
-          break;
-        case 'paypal':
-          // Integrate with PayPal
-          await processPayPalPayment(paymentIntent.id);
-          break;
-      }
-
-      // Update payment status
-      const { error: updateError } = await supabase
-        .from('payments')
-        .update({ status: 'completed' })
-        .eq('id', payment.id);
-
-      if (updateError) throw updateError;
+      // Create a new payment using the mock service
+      const newPayment: Payment = await createPayment({
+        bookingId,
+        amount,
+        currency,
+        method: paymentMethod,
+        paymentDetails: {
+          cardNumber: cardDetails.number,
+          expiryDate: cardDetails.expiry,
+          cvv: cardDetails.cvc,
+          cardholderName: cardDetails.name,
+        }
+      });
 
       toast({
         title: 'Payment Successful',
         description: 'Your payment has been processed successfully',
       });
 
-      onSuccess?.(payment);
-      navigate(`/payments/${payment.id}`);
+      onSuccess?.(newPayment);
+      navigate(`/payments/${newPayment.id}`);
     } catch (error) {
       toast({
         title: 'Payment Failed',
@@ -129,7 +96,7 @@ export function PaymentForm({
 
   const processCreditCardPayment = async (
     clientSecret: string,
-    cardDetails: typeof cardDetails
+    cardDetails: CardDetails
   ) => {
     // Implement credit card processing logic here
     // This would typically involve integrating with Stripe or another payment processor
@@ -212,7 +179,7 @@ export function PaymentForm({
                   htmlFor="paypal"
                   className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
-                  <Paypal className="mb-3 h-6 w-6" />
+                  <CreditCardIcon className="mb-3 h-6 w-6" />
                   PayPal
                 </Label>
               </div>
@@ -300,7 +267,7 @@ export function PaymentForm({
                   // Implement PayPal button logic
                 }}
               >
-                <Paypal className="mr-2 h-4 w-4" />
+                <CreditCardIcon className="mr-2 h-4 w-4" />
                 Pay with PayPal
               </Button>
             </div>

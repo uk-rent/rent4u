@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import {
   Table,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { getUserPaymentHistory } from '@/lib/payment.service';
 
 interface PaymentHistoryProps {
   bookingId?: string;
@@ -46,28 +47,18 @@ export function PaymentHistory({
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('payments')
-        .select(`
-          *,
-          booking:bookings(*)
-        `)
-        .order('created_at', { ascending: false });
-
+      const fetchedPayments = await getUserPaymentHistory(userId || user?.id || '');
+      
+      // Apply filters
+      let filteredPayments = fetchedPayments;
       if (bookingId) {
-        query = query.eq('booking_id', bookingId);
-      }
-      if (userId) {
-        query = query.eq('user_id', userId);
+        filteredPayments = filteredPayments.filter(payment => payment.bookingId === bookingId);
       }
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        filteredPayments = filteredPayments.filter(payment => payment.status === statusFilter);
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setPayments(data || []);
+      
+      setPayments(filteredPayments);
     } catch (error) {
       toast({
         title: 'Error',
@@ -166,7 +157,7 @@ export function PaymentHistory({
                   </Badge>
                 </TableCell>
                 <TableCell className="font-mono text-sm">
-                  {payment.transactionId}
+                  {payment.transactionId || '-'}
                 </TableCell>
                 <TableCell>
                   <div className="flex space-x-2">

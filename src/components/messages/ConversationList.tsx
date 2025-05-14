@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Conversation, Message } from '@/types/message.types';
@@ -5,9 +6,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { SearchIcon } from 'lucide-react';
+import { getConversations } from '@/lib/message.service';
 
 interface ConversationListProps {
   onSelectConversation: (conversation: Conversation) => void;
@@ -25,30 +26,15 @@ export function ConversationList({
 
   useEffect(() => {
     fetchConversations();
-    subscribeToNewMessages();
-  }, []);
+  }, [user]);
 
   const fetchConversations = async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          messages:messages(*)
-        `)
-        .contains('participants', [user?.id])
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Process conversations to include last message
-      const processedConversations = data.map((conv) => ({
-        ...conv,
-        lastMessage: conv.messages[conv.messages.length - 1],
-      }));
-
-      setConversations(processedConversations);
+      const fetchedConversations = await getConversations(user.id);
+      setConversations(fetchedConversations);
     } catch (error) {
       toast({
         title: 'Error',
@@ -58,32 +44,6 @@ export function ConversationList({
     } finally {
       setLoading(false);
     }
-  };
-
-  const subscribeToNewMessages = () => {
-    const subscription = supabase
-      .channel('conversations')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          if (
-            conversations.some((conv) => conv.id === newMessage.conversation_id)
-          ) {
-            fetchConversations(); // Refresh conversations when new message arrives
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   };
 
   const getParticipantName = (participantId: string) => {
@@ -97,7 +57,7 @@ export function ConversationList({
       getParticipantName(conversation.participants[0])
         .toLowerCase()
         .includes(searchLower) ||
-      conversation.lastMessage?.content.toLowerCase().includes(searchLower)
+      (conversation.lastMessage?.content.toLowerCase().includes(searchLower) ?? false)
     );
   });
 
