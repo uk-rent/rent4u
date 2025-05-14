@@ -1,27 +1,45 @@
 
 /**
- * Format a date using the locale date format
+ * Format a date string into a localized date format
  */
-export function formatDate(date: string | Date, options: Intl.DateTimeFormatOptions = {}): string {
-  if (!date) return '';
+export function formatDate(dateString: string | undefined, options: Intl.DateTimeFormatOptions = {}): string {
+  if (!dateString) return 'N/A';
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  return new Intl.DateTimeFormat('en-US', {
-    day: 'numeric',
-    month: 'short',
+  const defaultOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
+    month: 'short',
+    day: 'numeric',
     ...options
-  }).format(dateObj);
+  };
+  
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', defaultOptions).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid date';
+  }
 }
 
 /**
- * Format currency with proper symbol and decimals
+ * Format a number as a currency
  */
-export function formatCurrency(amount: number, currency: string = 'USD', locale: string = 'en-US'): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2
-  }).format(amount);
+export function formatCurrency(
+  value: number | undefined, 
+  currency = 'GBP', 
+  locale = 'en-GB'
+): string {
+  if (value === undefined) return 'N/A';
+  
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch (error) {
+    console.error('Error formatting currency:', error);
+    return `${value}`;
+  }
 }

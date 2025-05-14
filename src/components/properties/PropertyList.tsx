@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Property, PropertyFilterOptions } from '@/types/property.types';
-import { PropertyCard } from './PropertyCard';
+import PropertyCard from './PropertyCard';
 import { PropertyFilter } from './PropertyFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

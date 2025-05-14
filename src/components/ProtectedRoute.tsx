@@ -1,9 +1,10 @@
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/types/user.types";
 
 type ProtectedRouteProps = {
-  requiredRole?: 'tenant' | 'landlord' | 'admin';
+  requiredRole?: UserRole;
   redirectPath?: string;
 };
 

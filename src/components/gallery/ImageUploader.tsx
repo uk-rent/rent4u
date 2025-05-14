@@ -76,6 +76,7 @@ export function ImageUploader({
       // For now we'll simulate the upload and return mock URLs
       setTimeout(() => {
         const mockUploadedImages: PropertyImage[] = previewImages.map((img, index) => ({
+          id: `img-${Date.now()}-${index}`, // Generate a unique ID
           url: img.preview,
           alt: `Property image ${index + 1}`,
           isMain: index === 0,

@@ -1,24 +1,28 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { UserProfile, UserWithProfile } from '@/types/user.types';
+import { UserProfile, UserRole, UserWithProfile } from '@/types/user.types';
 
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
+  userRole: UserRole | null; // Added userRole property
+  session: any | null; // Added session property
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData?: Partial<UserProfile>) => Promise<void>;
+  signUp: (data: { email: string, password: string, firstName?: string, lastName?: string, userType?: string }) => Promise<void>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  confirmPasswordReset: (token: string, password: string) => Promise<void>; // Added confirmPasswordReset
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null); // Added userRole state
+  const [session, setSession] = useState<any | null>(null); // Added session state
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -54,10 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
 
           setUser(mappedUser);
+          setUserRole(mappedUser.role || null);
+          setSession(session);
         }
       } catch (error) {
         console.error('Error checking authentication', error);
         setUser(null);
+        setUserRole(null);
+        setSession(null);
       } finally {
         setLoading(false);
       }
@@ -90,8 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
 
           setUser(mappedUser);
+          setUserRole(mappedUser.role || null);
+          setSession(session);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          setUserRole(null);
+          setSession(null);
         }
       }
     );
@@ -101,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Fix the signIn function to match the interface
   const signIn = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -125,20 +138,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (
-    email: string,
-    password: string,
-    userData?: Partial<UserProfile>
-  ) => {
+  // Fix the signUp function to match the interface
+  const signUp = async ({
+    email,
+    password,
+    firstName,
+    lastName,
+    userType = 'tenant'
+  }: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    userType?: string;
+  }) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            first_name: userData?.firstName,
-            last_name: userData?.lastName,
-            role: userData?.role || 'tenant',
+            first_name: firstName,
+            last_name: lastName,
+            role: userType || 'tenant',
           },
         },
       });
@@ -151,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Please check your email for a verification link to complete your registration.',
       });
 
-      navigate('/login');
+      navigate('/auth/login');
     } catch (error: any) {
       toast({
         title: 'Sign up failed',
@@ -161,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Keep existing signOut function
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -168,6 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
 
       setUser(null);
+      setUserRole(null);
+      setSession(null);
       toast({
         title: 'Signed out',
         description: 'You have been successfully signed out.',
@@ -183,6 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Keep existing updateUser function
   const updateUser = async (userData: Partial<UserProfile>) => {
     if (!user) return;
 
@@ -219,6 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Keep existing resetPassword function
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -241,16 +268,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Add the missing confirmPasswordReset function
+  const confirmPasswordReset = async (token: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(password, {
+        redirectTo: `${window.location.origin}/auth/login`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Password reset successful',
+        description: 'Your password has been reset successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Password reset failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        userRole,
+        session,
         loading,
         signIn,
         signUp,
         signOut,
         updateUser,
         resetPassword,
+        confirmPasswordReset
       }}
     >
       {children}

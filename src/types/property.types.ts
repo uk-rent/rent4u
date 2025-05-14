@@ -1,4 +1,3 @@
-
 // Tipo de propiedad
 export type PropertyType = 'apartment' | 'house' | 'room' | 'studio' | 'commercial' | 'land';
 
@@ -74,6 +73,7 @@ export interface Property {
   updatedAt: string;
   publishedAt?: string;
   metadata?: Record<string, any>;
+  available?: string;
   
   // These fields are needed for backwards compatibility with existing components
   address?: string;

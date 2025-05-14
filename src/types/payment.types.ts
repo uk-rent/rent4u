@@ -1,33 +1,39 @@
 
-export type PaymentMethod = 'credit_card' | 'paypal' | 'bank_transfer' | 'cash';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+export type PaymentMethod = 'credit_card' | 'debit_card' | 'bank_transfer' | 'paypal' | 'cash';
 
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partially_refunded' | 'cancelled';
+export interface PaymentDetails {
+  cardType?: string;
+  last4?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  billingAddress?: string;
+  accountNumber?: string;
+  bankName?: string;
+}
 
 export interface Payment {
   id: string;
-  bookingId: string;
-  transactionId: string;
   userId: string;
   amount: number;
   currency: string;
-  method: PaymentMethod;
   status: PaymentStatus;
+  paymentMethod: PaymentMethod;
+  paymentDetails?: PaymentDetails;
   createdAt: string;
   updatedAt: string;
-  refundedPaymentId?: string;
-  refundReason?: string;
+  description?: string;
 }
 
 export interface CreatePaymentDto {
-  bookingId: string;
   userId: string;
   amount: number;
   currency?: string;
-  method: PaymentMethod;
+  paymentMethod: PaymentMethod;
+  description?: string;
 }
 
-export interface RefundPaymentDto {
-  paymentId: string;
-  amount: number;
-  reason: string;
+export interface UpdatePaymentDto {
+  status?: PaymentStatus;
+  description?: string;
 }
