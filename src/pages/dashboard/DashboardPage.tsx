@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { DashboardShell } from '@/components/ui/dashboard-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import PropertyCard from '@/components/properties/PropertyCard';
+import PropertyCard from '@/components/properties/PropertyCard'; // Fix the import
 import { Property } from '@/types/property.types';
 import { Subscription } from '@/types/subscription.types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Building, PlusSquare, Heart } from 'lucide-react';
-import { getProperties, getSavedProperties } from '@/lib/property.service';
+import { getProperties, getSavedProperties } from '@/lib/property.service'; // Import both functions
 import { getActiveSubscription } from '@/lib/subscription.service';
+import { mapDbPropertyToProperty } from '@/utils/property.mapper'; // Import the mapper function
 
 export default function DashboardPage() {
   const { user, userRole } = useAuth();

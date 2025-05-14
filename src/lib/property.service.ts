@@ -1,6 +1,7 @@
 
 import { Property, PropertyType } from '@/types/property.types';
 import { supabase } from '@/integrations/supabase/client';
+import { mapDbPropertyToProperty } from '@/utils/property.mapper';
 
 // Mock function to simulate fetching properties
 export const getProperties = async (params: any = {}) => {
@@ -80,14 +81,17 @@ export const getSavedProperties = async (userId: string, options = { limit: 10, 
     
     // Get the full property details for each saved property
     if (savedIds.length > 0) {
-      const { data: properties, error: propertiesError } = await supabase
+      const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
         .select('*')
         .in('id', savedIds);
         
       if (propertiesError) throw propertiesError;
       
-      return { data: properties || [], savedIds };
+      // Map database properties to the Property type
+      const properties = (propertiesData || []).map(dbProperty => mapDbPropertyToProperty(dbProperty));
+      
+      return { data: properties, savedIds };
     }
     
     return { data: [], savedIds: [] };

@@ -174,6 +174,11 @@ export interface PropertySearchParams extends PropertyFilterOptions {
     east: number;
     west: number;
   };
+  locationFilter?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
 }
 
 export interface PropertyBooking {
