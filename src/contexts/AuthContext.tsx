@@ -7,24 +7,35 @@ import { UserProfile, UserRole, UserWithProfile } from '@/types/user.types';
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
-  userRole: UserRole | null; // Added userRole property
-  session: any | null; // Added session property
+  userRole: UserRole | null; 
+  session: any | null; 
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: { email: string, password: string, firstName?: string, lastName?: string, userType?: string }) => Promise<void>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  confirmPasswordReset: (token: string, password: string) => Promise<void>; // Added confirmPasswordReset
+  confirmPasswordReset: (token: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null); // Added userRole state
-  const [session, setSession] = useState<any | null>(null); // Added session state
+  const [userRole, setUserRole] = useState<UserRole | null>(null); 
+  const [session, setSession] = useState<any | null>(null); 
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  
+  // Get the navigate function safely with a try/catch
+  let navigate;
+  try {
+    navigate = useNavigate();
+  } catch (error) {
+    console.error("Router not available:", error);
+    // Provide a no-op navigate function as fallback
+    navigate = (to: string) => {
+      console.warn("Navigation attempted but router not available:", to);
+    };
+  }
 
   // Check if user is already logged in
   useEffect(() => {
@@ -128,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: 'You have been successfully signed in.',
       });
       
-      navigate('/dashboard');
+      if (navigate) navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Sign in failed',
@@ -173,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Please check your email for a verification link to complete your registration.',
       });
 
-      navigate('/auth/login');
+      if (navigate) navigate('/auth/login');
     } catch (error: any) {
       toast({
         title: 'Sign up failed',
@@ -183,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Keep existing signOut function
+  // Keep existing signOut function but add navigate check
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -198,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: 'You have been successfully signed out.',
       });
       
-      navigate('/');
+      if (navigate) navigate('/');
     } catch (error: any) {
       toast({
         title: 'Sign out failed',
@@ -208,7 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Keep existing updateUser function
+  // Keep existing updateUser function (no navigate needed)
   const updateUser = async (userData: Partial<UserProfile>) => {
     if (!user) return;
 
@@ -245,7 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Keep existing resetPassword function
+  // Keep existing resetPassword function (navigate check added)
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -268,7 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Add the missing confirmPasswordReset function
+  // Add the missing confirmPasswordReset function (navigate check added)
   const confirmPasswordReset = async (token: string, password: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(password, {
@@ -281,6 +292,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: 'Password reset successful',
         description: 'Your password has been reset successfully.',
       });
+      
+      if (navigate) navigate('/auth/login');
     } catch (error: any) {
       toast({
         title: 'Password reset failed',
