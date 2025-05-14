@@ -16,11 +16,14 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Create a proper location filter object
+    const locationObj = location ? { city: location } : undefined;
+    
     onSearch({
       query,
       location: location || undefined,
-      // Fix the type issue by providing location as an object
-      locationFilter: location ? { city: location } : undefined,
+      locationFilter: locationObj,
       page: 1
     });
   };

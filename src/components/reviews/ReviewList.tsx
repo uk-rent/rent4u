@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export function ReviewList({
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const result = await supabase
         .from('reviews')
         .select(`
           *,
@@ -47,11 +47,11 @@ export function ReviewList({
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      
+      if (result.error) throw result.error;
       
       // Convert from database format to Review format
-      const formattedReviews: Review[] = (data || []).map(review => ({
+      const formattedReviews: Review[] = (result.data || []).map(review => ({
         id: review.id,
         propertyId: review.property_id,
         userId: review.user_id,
@@ -81,16 +81,18 @@ export function ReviewList({
 
   const fetchStats = async () => {
     try {
-      const { data, error } = await supabase
+      const result = await supabase
         .from('reviews')
         .select('rating')
         .eq('property_id', propertyId);
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
-      const ratings = data.map((review) => review.rating);
+      const ratings = result.data.map((review) => review.rating);
       const averageRating =
-        ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+        ratings.length > 0 
+          ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+          : 0;
 
       const distribution = ratings.reduce(
         (acc, rating) => {

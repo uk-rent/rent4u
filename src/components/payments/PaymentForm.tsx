@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,16 +63,12 @@ export function PaymentForm({
     try {
       // Create a new payment using the mock service
       const newPayment: Payment = await createPayment({
+        userId: user.id,
         bookingId,
         amount,
         currency,
-        method: paymentMethod,
-        paymentDetails: {
-          cardNumber: cardDetails.number,
-          expiryDate: cardDetails.expiry,
-          cvv: cardDetails.cvc,
-          cardholderName: cardDetails.name,
-        }
+        paymentMethod,
+        description: `Payment for booking ${bookingId}`
       });
 
       toast({

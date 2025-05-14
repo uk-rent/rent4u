@@ -25,11 +25,67 @@ export const createNotification = async (notificationData: CreateNotificationDto
   return newNotification;
 };
 
+// Mock function to get user notifications
+export const getUserNotifications = async (userId: string, options = { page: 1, limit: 10 }, statuses?: string[]): Promise<{ data: Notification[], total: number }> => {
+  // Simulate fetching user notifications
+  console.log('Fetching notifications for user:', userId, options);
+  
+  // Return mock notifications
+  return {
+    data: [
+      {
+        id: 'notification-1',
+        user_id: userId,
+        type: 'system',
+        message: 'Welcome to our platform!',
+        data: null,
+        status: 'sent',
+        read_at: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: 'notification-2',
+        user_id: userId,
+        type: 'message',
+        message: 'You have a new message',
+        data: { conversationId: '123' },
+        status: 'delivered',
+        read_at: null,
+        created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      }
+    ],
+    total: 2
+  };
+};
+
+// Mock function to mark notifications as read
+export const markNotificationsAsRead = async (userId: string, notificationIds: string[]): Promise<boolean> => {
+  // Simulate marking notifications as read
+  console.log('Marking notifications as read:', userId, notificationIds);
+  return true;
+};
+
+// Mock function to get unread notification count
+export const getUnreadNotificationsCount = async (userId: string): Promise<number> => {
+  // Simulate getting unread notification count
+  console.log('Getting unread notifications count for user:', userId);
+  return 2; // Mock count
+};
+
 // Mock function to get user push subscription
 export const getUserSubscription = async (userId: string): Promise<PushSubscription | null> => {
   // Simulate fetching a user's push subscription from the database
   console.log('Fetching push subscription for user:', userId);
-  return null;
+  // Return mock subscription
+  return {
+    id: 'sub-1',
+    userId: userId,
+    endpoint: 'https://example.com/endpoint',
+    p256dh: 'p256dh-key',
+    auth: 'auth-key',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
 // Mock function to save user push subscription
@@ -39,18 +95,31 @@ export const saveUserSubscription = async (userId: string, subscription: PushSub
   return subscription;
 };
 
-// Mock function to delete user push subscription
-export const deleteUserSubscription = async (subscriptionId: string): Promise<boolean> => {
-  // Simulate deleting a user's push subscription from the database
-  console.log('Deleting push subscription:', subscriptionId);
-  return true;
-};
-
 // Mock function to get all push subscriptions
 export const getAllSubscriptions = async (): Promise<PushSubscription[]> => {
   // Simulate fetching all push subscriptions from the database
   console.log('Fetching all push subscriptions');
-  return [];
+  // Return mock subscriptions
+  return [
+    {
+      id: 'sub-1',
+      userId: 'user-1',
+      endpoint: 'https://example.com/endpoint1',
+      p256dh: 'p256dh-key-1',
+      auth: 'auth-key-1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'sub-2',
+      userId: 'user-2',
+      endpoint: 'https://example.com/endpoint2',
+      p256dh: 'p256dh-key-2',
+      auth: 'auth-key-2',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
 };
 
 // Mock function to send a test notification
@@ -154,20 +223,6 @@ export const markNotificationAsRead = async (notificationId: string): Promise<bo
 export const archiveNotification = async (notificationId: string): Promise<boolean> => {
   // Simulate archiving notification
   console.log('Archiving notification:', notificationId);
-  return true;
-};
-
-// Mock function to get unread notification count
-export const getUnreadNotificationCount = async (userId: string): Promise<number> => {
-  // Simulate getting unread notification count
-  console.log('Getting unread notification count for user:', userId);
-  return 0;
-};
-
-// Mock function to clear notification history
-export const clearNotificationHistory = async (userId: string): Promise<boolean> => {
-  // Simulate clearing notification history
-  console.log('Clearing notification history for user:', userId);
   return true;
 };
 
@@ -374,8 +429,7 @@ export const updatePersonalizedNotificationTemplateContent = async (templateId: 
   return true;
 };
 
-// Update typecasting to handle the different property names
-// Look for the problematic conversions in the file and update them
+// Utility function to convert database subscription to PushSubscription
 const convertDatabaseSubscriptionToPushSubscription = (dbSubscription: any): PushSubscription => {
   return {
     id: dbSubscription.id,
@@ -386,50 +440,4 @@ const convertDatabaseSubscriptionToPushSubscription = (dbSubscription: any): Pus
     createdAt: dbSubscription.created_at,
     updatedAt: dbSubscription.updated_at
   };
-};
-
-// Update the functions that were causing errors
-export const getUserSubscription = async (userId: string): Promise<PushSubscription | null> => {
-  // Simulate fetching a user's push subscription from the database
-  console.log('Fetching push subscription for user:', userId);
-  // Replace the direct typecasting with the converter function
-  const dbSubscription = { 
-    id: 'sub-1',
-    user_id: userId,
-    endpoint: 'https://example.com/endpoint',
-    p256dh: 'p256dh-key',
-    auth: 'auth-key',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  
-  return convertDatabaseSubscriptionToPushSubscription(dbSubscription);
-};
-
-export const getAllSubscriptions = async (): Promise<PushSubscription[]> => {
-  // Simulate fetching all push subscriptions from the database
-  console.log('Fetching all push subscriptions');
-  // Replace the direct typecasting with the converter function
-  const dbSubscriptions = [
-    { 
-      id: 'sub-1',
-      user_id: 'user-1',
-      endpoint: 'https://example.com/endpoint1',
-      p256dh: 'p256dh-key-1',
-      auth: 'auth-key-1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    { 
-      id: 'sub-2',
-      user_id: 'user-2',
-      endpoint: 'https://example.com/endpoint2',
-      p256dh: 'p256dh-key-2',
-      auth: 'auth-key-2',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ];
-  
-  return dbSubscriptions.map(convertDatabaseSubscriptionToPushSubscription);
 };
