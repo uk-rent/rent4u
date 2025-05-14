@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
+import { refundPayment } from '@/lib/payment.service';
 
 interface RefundFormProps {
   payment: Payment;
@@ -39,40 +40,12 @@ export function RefundForm({ payment, onSuccess }: RefundFormProps) {
 
     setLoading(true);
     try {
-      // Create refund intent
-      const { data: refundIntent, error: intentError } = await supabase
-        .functions.invoke('create-refund-intent', {
-          body: {
-            payment_id: payment.id,
-            amount: formData.amount,
-            reason: formData.reason,
-          },
-        });
-
-      if (intentError) throw intentError;
-
-      // Update payment status
-      const { error: updateError } = await supabase
-        .from('payments')
-        .update({ status: 'refunded' })
-        .eq('id', payment.id);
-
-      if (updateError) throw updateError;
-
-      // Create refund record
-      const { error: refundError } = await supabase
-        .from('refunds')
-        .insert([
-          {
-            payment_id: payment.id,
-            amount: formData.amount,
-            reason: formData.reason,
-            status: 'completed',
-            processed_by: user.id,
-          },
-        ]);
-
-      if (refundError) throw refundError;
+      // Process refund using payment service
+      await refundPayment({
+        paymentId: payment.id,
+        amount: formData.amount,
+        reason: formData.reason
+      });
 
       toast({
         title: 'Refund Successful',
