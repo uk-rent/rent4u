@@ -17,12 +17,12 @@ export function PropertySearch({ onSearch, initialQuery = '' }: PropertySearchPr
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create a proper location filter object with city property
+    // Create a proper location filter object
     const locationFilter = location ? { city: location, state: undefined, country: undefined } : undefined;
     
     onSearch({
       query,
-      location: location || undefined,
+      location: undefined, // Set to undefined since we're using locationFilter
       locationFilter,
       page: 1
     });

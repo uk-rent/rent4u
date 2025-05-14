@@ -1,4 +1,6 @@
+
 import { Property, PropertyType } from '@/types/property.types';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock function to simulate fetching properties
 export const getProperties = async (params: any = {}) => {
@@ -63,8 +65,8 @@ export const getProperties = async (params: any = {}) => {
   }
 };
 
-// Add missing getSavedProperties function
-export const getSavedProperties = async (userId: string) => {
+// Add getSavedProperties function
+export const getSavedProperties = async (userId: string, options = { limit: 10, page: 1 }) => {
   try {
     const { data, error } = await supabase
       .from('saved_properties')
@@ -91,6 +93,33 @@ export const getSavedProperties = async (userId: string) => {
     return { data: [], savedIds: [] };
   } catch (error) {
     console.error('Error fetching saved properties:', error);
+    throw error;
+  }
+};
+
+// Add function to toggle saved property
+export const toggleSavedProperty = async (userId: string, propertyId: string, isSaved: boolean) => {
+  try {
+    if (isSaved) {
+      // Add to saved properties
+      const { error } = await supabase
+        .from('saved_properties')
+        .insert({ user_id: userId, property_id: propertyId });
+      
+      if (error) throw error;
+      return { success: true, saved: true };
+    } else {
+      // Remove from saved properties
+      const { error } = await supabase
+        .from('saved_properties')
+        .delete()
+        .match({ user_id: userId, property_id: propertyId });
+      
+      if (error) throw error;
+      return { success: true, saved: false };
+    }
+  } catch (error) {
+    console.error('Error toggling saved property:', error);
     throw error;
   }
 };

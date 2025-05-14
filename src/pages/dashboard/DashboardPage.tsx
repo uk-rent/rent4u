@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { DashboardShell } from '@/components/ui/dashboard-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PropertyCard } from '@/components/properties/PropertyCard';
+import PropertyCard from '@/components/properties/PropertyCard';
 import { Property } from '@/types/property.types';
 import { Subscription } from '@/types/subscription.types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Building, PlusSquare, Heart } from 'lucide-react';
-import { getProperties } from '@/lib/property.service';
+import { getProperties, getSavedProperties } from '@/lib/property.service';
 import { getActiveSubscription } from '@/lib/subscription.service';
 
 export default function DashboardPage() {
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           setSubscription(activeSub);
         } else if (userRole === 'tenant') {
           // Cargar propiedades guardadas del inquilino
-          const savedResult = await getSavedProperties(user.id, { limit: 4 });
+          const savedResult = await getSavedProperties(user.id);
           setSavedProperties(savedResult.data);
         }
       } catch (error) {
@@ -57,7 +57,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <p className="text-gray-500">
-              Bienvenido, {user?.profile?.first_name || 'Usuario'}
+              Bienvenido, {user?.firstName || 'Usuario'}
             </p>
           </div>
 
@@ -152,7 +152,21 @@ export default function DashboardPage() {
                   ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {properties.map((property) => (
-                        <PropertyCard key={property.id} property={property} showActions={false} />
+                        <PropertyCard 
+                          key={property.id}
+                          id={property.id}
+                          title={property.title}
+                          location={property.location?.address || ''}
+                          postcode={property.location?.postalCode || ''}
+                          price={property.price}
+                          image={property.images?.[0]?.url}
+                          propertyType={property.type}
+                          beds={property.features?.bedrooms}
+                          baths={property.features?.bathrooms}
+                          available={property.available || 'now'}
+                          featured={property.is_featured}
+                          onFavoriteToggle={() => {}}
+                        />
                       ))}
                     </div>
                   )}
@@ -189,12 +203,19 @@ export default function DashboardPage() {
                     {savedProperties.map((property) => (
                       <PropertyCard 
                         key={property.id} 
-                        property={property} 
-                        saved={true}
-                        onSaveToggle={(id, saved) => {
-                          // Implementar lógica de guardar/quitar favorito
-                          console.log(`Toggle save for ${id}: ${saved}`);
-                        }}
+                        id={property.id}
+                        title={property.title}
+                        location={property.location?.address || ''}
+                        postcode={property.location?.postalCode || ''}
+                        price={property.price}
+                        image={property.images?.[0]?.url}
+                        propertyType={property.type}
+                        beds={property.features?.bedrooms}
+                        baths={property.features?.bathrooms}
+                        available={property.available || 'now'}
+                        featured={property.is_featured}
+                        isFavorite={true}
+                        onFavoriteToggle={() => {}}
                       />
                     ))}
                   </div>
